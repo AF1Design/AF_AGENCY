@@ -39,8 +39,12 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: "/images/logo-transparent.png",
-    apple: "/images/logo-transparent.png",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 
@@ -54,11 +58,14 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className="scroll-smooth">
       <head>
-        {/* استيراد خط تجوال وكايرو والمراعي عبر شبكة جوجل العالمية لضمان نقاء الحروف ووضوحها الفائق */}
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        {/* استيراد خط كايرو الرئيسي المعتمد وخطوط بلس جاكرتا سانس وساين المساندة عبر جوجل فوتتس */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@600;700;800&family=Almarai:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
           rel="stylesheet"
         />
       </head>

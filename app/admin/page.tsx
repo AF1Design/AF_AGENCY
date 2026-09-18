@@ -312,9 +312,11 @@ export default function AdminPage() {
               title="العودة للمنصة الرئيسية"
               className="flex items-center gap-3 hover:opacity-90 transition-opacity"
             >
-              <div className="w-10 h-10 rounded-xl bg-af-yellow text-black flex items-center justify-center font-black text-base shadow-yellow-glow-sm shrink-0">
-                AF
-              </div>
+              <img
+                src="/icon.png"
+                alt="AF Logo"
+                className="w-10 h-10 rounded-xl object-contain bg-black border border-af-yellow/40 shadow-yellow-glow-sm shrink-0"
+              />
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-base sm:text-lg font-black text-white">لوحة تحكم الطلبات والعملاء</h1>

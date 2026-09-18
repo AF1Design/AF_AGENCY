@@ -26,11 +26,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["'Tajawal'", "'Cairo'", "'Almarai'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        tajawal: ["'Tajawal'", "sans-serif"],
+        sans: ["'Cairo'", "'Plus Jakarta Sans'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         cairo: ["'Cairo'", "sans-serif"],
-        almarai: ["'Almarai'", "sans-serif"],
         english: ["'Plus Jakarta Sans'", "system-ui", "-apple-system", "sans-serif"],
+        jakarta: ["'Plus Jakarta Sans'", "sans-serif"],
+        syne: ["'Syne'", "sans-serif"],
       },
       boxShadow: {
         "yellow-glow": "0 0 35px -5px rgba(255, 229, 0, 0.4)",

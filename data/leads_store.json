@@ -19,25 +19,6 @@
     "status": "new"
   },
   {
-    "client_name": "أحمد محمود (اختبار سوبابيس المباشر)",
-    "phone": "01011223344",
-    "brand_name": "البراند العصري للتصميم",
-    "business_field": "تسويق رقمي وبرمجة",
-    "delivery_timeframe": "من أسبوع إلى أسبوعين",
-    "max_budget": "15,000 ج.م",
-    "service_category": "web",
-    "selected_package": "Corporate Website Experience",
-    "selected_addons": [],
-    "client_notes": "اسم البراند/الشركة: البراند العصري للتصميم | مجال العمل/المنتجات: تسويق رقمي وبرمجة | وقت التسليم المطلوب: من أسبوع إلى أسبوعين | سقف الميزانية: 15,000 ج.م | ملاحظات: طلب تجريبي لاختبار المزامنة التلقائية مع قاعدة سوبابيس",
-    "ad_source": "اختبار الربط المباشر",
-    "lead_type": "order",
-    "country": "مصر",
-    "currency": "EGP",
-    "created_at": "2026-09-18T16:23:39.951Z",
-    "id": "lead_1789748619951_5tc6k",
-    "status": "new"
-  },
-  {
     "client_name": "زائر استكشاف أسعار",
     "phone": "011111111112",
     "brand_name": "",
@@ -124,22 +105,6 @@
     "ad_source": "بوابة الدخول الرئيسية (Welcome Gate)",
     "created_at": "2026-09-18T13:40:35.313Z",
     "id": "lead_1789738835313_kajo6",
-    "status": "new"
-  },
-  {
-    "client_name": "كريم عبد العزيز",
-    "phone": "01012345678",
-    "brand_name": "المصري للمقاولات والديكور",
-    "business_field": "تشطيب وديكور هندسي فاخر",
-    "delivery_timeframe": "من أسبوع إلى أسبوعين",
-    "max_budget": "8,000 ج.م",
-    "service_category": "web",
-    "selected_package": "Corporate Website Experience",
-    "selected_addons": [],
-    "client_notes": "مطلوب موقع تعريفي رسمي راقي لعرض سابقة أعمال التشطيبات والمشاريع الكبرى",
-    "ad_source": "مباشر",
-    "created_at": "2026-09-18T13:21:00.125Z",
-    "id": "lead_1789737660125_igwt3",
     "status": "new"
   }
 ]
