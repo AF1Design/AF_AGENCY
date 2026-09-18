@@ -1,0 +1,70 @@
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#060709",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+export const metadata: Metadata = {
+  title: "AF AGENCY | Turning Your Dreams Into Reality - Digital Experience Studio",
+  description: "مؤسسة رقمية متخصصة في تطوير حلول الويب، تصميم الهويات المؤسسية، إدارة الحملات الإعلانية الموجهة بالأداء، وأكاديمية تدريب الجرافيك ديزاين والذكاء الاصطناعي.",
+  keywords: [
+    "AF AGENCY",
+    "تصميم مواقع",
+    "Web Development",
+    "Branding",
+    "هوية بصرية",
+    "Digital Marketing",
+    "تسويق الكتروني",
+    "AI Course",
+    "Graphic Design Course",
+  ],
+  authors: [{ name: "AF AGENCY" }],
+  openGraph: {
+    title: "AF AGENCY | Turning Your Dreams Into Reality",
+    description: "Build high-converting digital experiences with AF AGENCY.",
+    siteName: "AF AGENCY",
+    locale: "ar_EG",
+    type: "website",
+    images: [
+      {
+        url: "/images/logo-dark.png",
+        width: 800,
+        height: 600,
+        alt: "AF AGENCY Logo",
+      },
+    ],
+  },
+  icons: {
+    icon: "/images/logo-transparent.png",
+    apple: "/images/logo-transparent.png",
+  },
+};
+
+import Providers from "@/components/Providers";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ar" dir="rtl" className="scroll-smooth">
+      <head>
+        {/* استيراد خط تجوال وكايرو والمراعي عبر شبكة جوجل العالمية لضمان نقاء الحروف ووضوحها الفائق */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@600;700;800&family=Almarai:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-[#060709] text-[#F3F4F6] antialiased min-h-screen selection:bg-af-yellow selection:text-black">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}

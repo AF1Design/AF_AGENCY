@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@600;700;800&family=Almarai:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-af-yellow: #FFE500;
+  --color-af-dark: #060709;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: #060709;
+  color: #F9FAFB;
+  font-family: 'Tajawal', 'Cairo', 'Almarai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  direction: rtl;
+  text-align: right;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.8;
+  letter-spacing: 0 !important;
+  text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  line-height: 1.35;
+  letter-spacing: 0 !important;
+  font-weight: 700;
+}
+
+p, span, li, input, textarea, button {
+  font-family: 'Tajawal', 'Almarai', sans-serif;
+  letter-spacing: 0 !important;
+}
+
+/* خلفية هندسية إبداعية */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 40%, transparent 95%);
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* شبكة نقاط مضيئة خفيفة */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 229, 0, 0.08) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 80%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* تخصيص تحديد النصوص باللون الأصفر */
+::selection {
+  background-color: #FFE500;
+  color: #060709;
+}
+
+/* شريط تمرير أنيق ونحيف */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #060709;
+}
+::-webkit-scrollbar-thumb {
+  background: #202533;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FFE500;
+}
+
+/* تدرج نيون ذهبي للألقاب والعناوين */
+.text-gradient-yellow {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFE500 50%, #FFD000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* كروت زجاجية مظلمة متطورة تفاعلية */
+.af-glass-card {
+  background: rgba(14, 17, 24, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.85);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.af-glass-card:hover {
+  border-color: rgba(255, 229, 0, 0.45);
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px -15px rgba(255, 229, 0, 0.18), 0 0 30px -5px rgba(255, 229, 0, 0.25);
+}
+
+/* هالات إضاءة كروية متحركة بنعومة في الخلفية */
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* تأثير التوهج المضيء */
+.glow-yellow {
+  box-shadow: 0 0 35px -5px rgba(255, 229, 0, 0.45);
+}
+
+.glow-yellow-sm {
+  box-shadow: 0 0 15px -2px rgba(255, 229, 0, 0.4);
+}
+
+/* إخفاء شريط التمرير الأفقي للأجهزة الذكية مع بقاء السحب شغال */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
