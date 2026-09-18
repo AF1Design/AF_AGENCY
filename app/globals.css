@@ -16,13 +16,18 @@
 html {
   scroll-behavior: smooth;
   color-scheme: dark;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
 }
 
 body {
   background-color: #060709;
   color: #F9FAFB;
   font-family: 'Cairo', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
   direction: rtl;
   text-align: right;
   -webkit-font-smoothing: antialiased;
@@ -31,6 +36,16 @@ body {
   letter-spacing: 0 !important;
   text-rendering: optimizeLegibility;
   position: relative;
+  touch-action: pan-y;
+}
+
+/* منع تقريب الشاشة التلقائي المزعج في سفاري وآيفون عند الضغط على الحقول */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -129,12 +144,14 @@ body::after {
   box-shadow: 0 25px 50px -15px rgba(255, 229, 0, 0.18), 0 0 30px -5px rgba(255, 229, 0, 0.25);
 }
 
-/* هالات إضاءة كروية متحركة بنعومة في الخلفية */
+/* هالات إضاءة كروية متحركة بنعومة في الخلفية مع ضمان عدم خروجها عن عرض الشاشة */
 .ambient-orb {
   position: absolute;
   border-radius: 9999px;
   filter: blur(80px);
   pointer-events: none;
+  max-width: 80vw;
+  max-height: 80vw;
 }
 
 /* تأثير التوهج المضيء */

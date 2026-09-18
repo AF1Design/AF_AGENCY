@@ -40,6 +40,11 @@ export default function WelcomeGateModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof window !== "undefined") {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    }
     const errorMsg = validatePhone(inputPhone, selectedCountry);
     if (errorMsg) {
       setPhoneError(errorMsg);
@@ -73,6 +78,10 @@ export default function WelcomeGateModal() {
 
     setRegion(selectedCountry, inputPhone.trim());
     setIsSubmitting(false);
+
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
   };
 
   return (
@@ -191,7 +200,7 @@ export default function WelcomeGateModal() {
                       if (phoneError) setPhoneError("");
                     }}
                     placeholder={selectedCountry === "EG" ? "010XXXXXXXX" : "5XXXXXXXX"}
-                    className={`w-full bg-[#060709] border rounded-2xl px-4 py-3.5 pl-14 text-white text-sm font-mono text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
+                    className={`w-full bg-[#060709] border rounded-2xl px-4 py-3.5 pl-14 text-white text-base font-mono text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
                       phoneError
                         ? "border-red-500/80 ring-1 ring-red-500"
                         : "border-white/10 focus:border-af-yellow"
