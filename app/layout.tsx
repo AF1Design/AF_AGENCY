@@ -59,9 +59,10 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className="scroll-smooth">
       <head>
-        <link rel="icon" type="image/png" href="/icon.png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/icon.png" />
+        <link rel="icon" type="image/png" href="/icon.png?v=2" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
+        <link rel="shortcut icon" href="/favicon.ico?v=2" />
+        <link rel="apple-touch-icon" href="/icon.png?v=2" />
         {/* استيراد خط كايرو الرئيسي المعتمد وخطوط بلس جاكرتا سانس وساين المساندة عبر جوجل فوتتس */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
