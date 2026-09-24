@@ -2,7 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { MessageCircle, Phone, Sparkles, ArrowUpRight } from "lucide-react";
+import { MessageCircle, Phone, Sparkles, ArrowUpRight, GraduationCap, Briefcase } from "lucide-react";
+import { useRegion } from "@/context/RegionContext";
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -29,10 +30,13 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 export default function Footer() {
+  const { portalMode, setPortalMode } = useRegion();
   const whatsappNumber = "201114687759";
   const facebookUrl = "https://www.facebook.com/AF.design.2";
   const instagramUrl = "https://www.instagram.com/af_design.1?stkn=YXB1czAyb2U5NGtr&utm_source=qr";
   const tiktokUrl = "https://www.tiktok.com/@af_design1?_r=1&_t=ZS-99phbHZatQw";
+
+  const isAcademy = portalMode === "academy";
 
   return (
     <footer className="bg-af-dark border-t border-white/10 pt-16 pb-12 relative overflow-hidden">
@@ -45,8 +49,9 @@ export default function Footer() {
           <div className="md:col-span-2 space-y-4">
             <div className="relative w-40 sm:w-48 h-12">
               <Image
-                src="/images/logo-transparent.png"
-                alt="AF AGENCY"
+                key={portalMode}
+                src={isAcademy ? "/images/logo-academy.png" : "/images/logo-transparent.png"}
+                alt={isAcademy ? "AF ACADEMY" : "AF AGENCY"}
                 fill
                 className="object-contain"
               />
@@ -55,7 +60,9 @@ export default function Footer() {
               TURNING YOUR DREAMS INTO REALITY
             </p>
             <p className="text-af-gray text-xs sm:text-sm leading-relaxed max-w-sm font-normal">
-              مؤسسة رقمية متخصصة في تطوير حلول الويب المتقدمة، بناء الهويات المؤسسية، إدارة الحملات الإعلانية الموجهة بالأداء، وتدريب الكفاءات بأدوات الذكاء الاصطناعي.
+              {!isAcademy
+                ? "مؤسسة رقمية متخصصة في تطوير حلول الويب المتقدمة، بناء الهويات المؤسسية، وإدارة الحملات الإعلانية الموجهة بالأداء."
+                : "أكاديمية ومعمل ابتكار متخصص في تدريب وتأهيل مصممي الجرافيك وصناع المحتوى بأحدث أدوات الذكاء الاصطناعي التوليدي وسوق العمل الحر."}
             </p>
 
             {/* بطاقات منصات التواصل الرسمية */}
@@ -98,38 +105,78 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* روابط سريعة */}
+          {/* روابط سريعة حسب الوضع النشط */}
           <div>
             <h4 className="text-xs font-bold text-white mb-4 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-af-yellow" />
-              <span>الخدمات والمسارات</span>
+              <span>{!isAcademy ? "خدمات المشاريع" : "المسارات الأكاديمية"}</span>
             </h4>
             <ul className="space-y-2.5 text-xs text-af-gray">
-              <li>
-                <a href="#configurator" className="hover:text-af-yellow transition-colors">
-                  تصميم وبرمجة المواقع
-                </a>
-              </li>
-              <li>
-                <a href="#configurator" className="hover:text-af-yellow transition-colors">
-                  الهوية البصرية والجرافيك
-                </a>
-              </li>
-              <li>
-                <a href="#configurator" className="hover:text-af-yellow transition-colors">
-                  التسويق الرقمي والحملات
-                </a>
-              </li>
-              <li>
-                <a href="#courses" className="hover:text-af-yellow transition-colors">
-                  دبلومة الجرافيك ديزاين
-                </a>
-              </li>
-              <li>
-                <a href="#courses" className="hover:text-af-yellow transition-colors">
-                  كورس أدوات الذكاء الاصطناعي
-                </a>
-              </li>
+              {!isAcademy ? (
+                <>
+                  <li>
+                    <a href="#configurator" className="hover:text-af-yellow transition-colors">
+                      تصميم وبرمجة المواقع
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#configurator" className="hover:text-af-yellow transition-colors">
+                      الهوية البصرية والمؤسسية
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#configurator" className="hover:text-af-yellow transition-colors">
+                      التسويق الرقمي وإعلانات الأداء
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#portfolio" className="hover:text-af-yellow transition-colors">
+                      سابقة الأعمال والمشاريع
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setPortalMode("academy")}
+                      className="text-af-yellow hover:underline flex items-center gap-1 font-bold pt-1"
+                    >
+                      <GraduationCap className="w-3.5 h-3.5" />
+                      <span>استكشف أكاديمية AF</span>
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <a href="#courses" className="hover:text-af-yellow transition-colors">
+                      دبلومة الجرافيك ديزاين
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#courses" className="hover:text-af-yellow transition-colors">
+                      ماستر كلاس الذكاء الاصطناعي
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#academy-why" className="hover:text-af-yellow transition-colors">
+                      بيئة التدريب والاستوديو
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#academy-outcomes" className="hover:text-af-yellow transition-colors">
+                      الشهادات المعتمدة والمخرجات
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setPortalMode("agency")}
+                      className="text-af-yellow hover:underline flex items-center gap-1 font-bold pt-1"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" />
+                      <span>استكشف خدمات المشاريع والشركات</span>
+                    </button>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -164,12 +211,27 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* حقوق النشر */}
+        {/* حقوق النشر والتبديل */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-af-muted">
-          <p>© {new Date().getFullYear()} AF AGENCY. جميع الحقوق محفوظة.</p>
-          <p className="flex items-center gap-1 text-af-yellow">
-            TURNING YOUR DREAMS INTO REALITY
-          </p>
+          <p>© {new Date().getFullYear()} {isAcademy ? "AF ACADEMY" : "AF AGENCY"}. جميع الحقوق محفوظة.</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPortalMode(isAcademy ? "agency" : "academy")}
+              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono text-[11px] flex items-center gap-1.5 transition-all"
+            >
+              {isAcademy ? (
+                <>
+                  <Briefcase className="w-3.5 h-3.5 text-af-yellow" />
+                  <span>التحويل إلى خدمات الشركات (Agency)</span>
+                </>
+              ) : (
+                <>
+                  <GraduationCap className="w-3.5 h-3.5 text-af-yellow" />
+                  <span>التحويل إلى مسارات الأكاديمية (Academy)</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </footer>

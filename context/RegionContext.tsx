@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { CountryCode, RegionCurrency } from "@/types";
+import { CountryCode, RegionCurrency, PortalMode } from "@/types";
 
 interface RegionContextType {
   country: CountryCode;
@@ -9,6 +9,9 @@ interface RegionContextType {
   phone: string;
   isAdmin: boolean;
   isGateOpen: boolean;
+  portalMode: PortalMode;
+  setPortalMode: (mode: PortalMode) => void;
+  togglePortalMode: () => void;
   setRegion: (country: CountryCode, userPhone?: string) => void;
   toggleCurrency: () => void;
   openGate: () => void;
@@ -23,6 +26,7 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState<RegionCurrency>("EGP");
   const [phone, setPhone] = useState<string>("");
   const [isGateOpen, setIsGateOpen] = useState(false);
+  const [portalMode, setPortalModeState] = useState<PortalMode>("agency");
 
   useEffect(() => {
     const savedCountry = localStorage.getItem("af_country") as CountryCode | null;
@@ -42,7 +46,41 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
       // إذا لم يكن هناك رقم هاتف مسجل أو سليم، تفتح نافذة الاختيار الإلزامية فوراً
       setIsGateOpen(true);
     }
+
+    // فحص وضع التصفح المطلوب عبر معلمات الرابط أو التخزين المحلي
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modeParam = urlParams.get("mode") || urlParams.get("tab") || urlParams.get("portal");
+      if (modeParam === "academy" || modeParam === "agency") {
+        setPortalModeState(modeParam as PortalMode);
+        localStorage.setItem("af_portal_mode", modeParam);
+      } else {
+        const savedMode = localStorage.getItem("af_portal_mode") as PortalMode | null;
+        if (savedMode === "agency" || savedMode === "academy") {
+          setPortalModeState(savedMode);
+        }
+      }
+    }
   }, []);
+
+  const setPortalMode = (mode: PortalMode) => {
+    setPortalModeState(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("af_portal_mode", mode);
+      const url = new URL(window.location.href);
+      if (mode === "academy") {
+        url.searchParams.set("mode", "academy");
+      } else {
+        url.searchParams.delete("mode");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const togglePortalMode = () => {
+    const nextMode: PortalMode = portalMode === "agency" ? "academy" : "agency";
+    setPortalMode(nextMode);
+  };
 
   const setRegion = (newCountry: CountryCode, userPhone?: string) => {
     const newCurrency: RegionCurrency = newCountry === "EG" ? "EGP" : "SAR";
@@ -113,6 +151,9 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
         phone,
         isAdmin,
         isGateOpen,
+        portalMode,
+        setPortalMode,
+        togglePortalMode,
         setRegion,
         toggleCurrency,
         openGate,

@@ -1,6 +1,7 @@
 export type ServiceCategory = 'web' | 'branding' | 'marketing' | 'courses';
 export type RegionCurrency = 'EGP' | 'SAR';
 export type CountryCode = 'EG' | 'GULF';
+export type PortalMode = 'agency' | 'academy';
 
 export interface PackagePricingItem {
   fromPrice: number;

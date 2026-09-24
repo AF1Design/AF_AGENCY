@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { MessageCircle, Menu, X, Sparkles, ChevronLeft, ArrowUpRight, Shield, LogOut, User } from "lucide-react";
+import {
+  MessageCircle,
+  Menu,
+  X,
+  Sparkles,
+  ChevronLeft,
+  ArrowUpRight,
+  Shield,
+  LogOut,
+  Briefcase,
+  GraduationCap,
+} from "lucide-react";
 import { useRegion } from "@/context/RegionContext";
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -34,7 +45,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onOpenConfigurator }: NavbarProps) {
-  const { phone, isAdmin, logout } = useRegion();
+  const { phone, isAdmin, logout, portalMode, setPortalMode } = useRegion();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -59,161 +70,265 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
   const instagramUrl = "https://www.instagram.com/af_design.1?stkn=YXB1czAyb2U5NGtr&utm_source=qr";
   const tiktokUrl = "https://www.tiktok.com/@af_design1?_r=1&_t=ZS-99phbHZatQw";
 
+  const isAcademy = portalMode === "academy";
+  const whatsappMsg = isAcademy
+    ? "مرحباً AF ACADEMY، أود الاستفسار عن تفاصيل الكورسات والمسارات التدريبية المتاحة."
+    : "مرحباً AF AGENCY، أود الاستفسار عن خدمات ومشاريع الويب والتسويق.";
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-[#060709]/90 backdrop-blur-xl border-b border-white/10 py-3 shadow-2xl"
-          : "bg-transparent py-5"
+          ? "bg-[#060709]/95 backdrop-blur-xl border-b border-white/10 py-2.5 sm:py-3 shadow-2xl"
+          : "bg-transparent py-3 sm:py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* اللوجو مع تأثير هوفر ثلاثي الأبعاد خفيف */}
-        <a href="#" className="flex items-center gap-3 group">
-          <div className="relative w-32 sm:w-44 h-10 sm:h-12 transition-transform duration-300 group-hover:scale-105">
-            <Image
-              src="/images/logo-transparent.png"
-              alt="AF AGENCY Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </a>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-3">
+          {/* الشعار ومفتاح التبديل للكمبيوتر */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <a href="#" className="flex items-center gap-3 group shrink-0">
+              <div className="relative w-32 sm:w-44 h-10 sm:h-12 transition-transform duration-300 group-hover:scale-105">
+                <Image
+                  key={portalMode}
+                  src={isAcademy ? "/images/logo-academy.png" : "/images/logo-transparent.png"}
+                  alt={isAcademy ? "AF ACADEMY Logo" : "AF AGENCY Logo"}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </a>
 
-        {/* الروابط لنسخة الكمبيوتر بالترقيم البرمجي المعاصر */}
-        <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-af-gray">
-          <button
-            onClick={() => scrollToSection("assurance")}
-            className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
-          >
-            <span className="text-[10px] text-af-yellow/70 font-mono">[ 01 ]</span>
-            <span>Assurance</span>
-          </button>
-          <button
-            onClick={() => scrollToSection("configurator")}
-            className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
-          >
-            <span className="text-[10px] text-af-yellow/70 font-mono">[ 02 ]</span>
-            <span>Services</span>
-          </button>
-          <button
-            onClick={() => scrollToSection("courses")}
-            className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
-          >
-            <span className="text-[10px] text-af-yellow/70 font-mono">[ 03 ]</span>
-            <span>Academy & AI</span>
-            <span className="text-[9px] bg-af-yellow/20 text-af-yellow border border-af-yellow/40 px-1.5 py-0.2 rounded font-mono font-bold">
-              HOT
-            </span>
-          </button>
-          <button
-            onClick={() => scrollToSection("portfolio")}
-            className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
-          >
-            <span className="text-[10px] text-af-yellow/70 font-mono">[ 04 ]</span>
-            <span>Case Studies</span>
-          </button>
-          <button
-            onClick={() => scrollToSection("why-us")}
-            className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
-          >
-            <span className="text-[10px] text-af-yellow/70 font-mono">[ 05 ]</span>
-            <span>Why AF</span>
-          </button>
+            {/* مفتاح التبديل للكمبيوتر والشاشات الكبيرة */}
+            <div className="hidden lg:flex items-center p-1 rounded-2xl bg-[#0E1118]/90 border border-white/10 shadow-inner">
+              <button
+                onClick={() => setPortalMode("agency")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  !isAcademy
+                    ? "bg-af-yellow text-black shadow-yellow-glow-sm font-extrabold"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Briefcase className="w-3.5 h-3.5" />
+                <span>المشاريع // Agency</span>
+              </button>
+              <button
+                onClick={() => setPortalMode("academy")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  isAcademy
+                    ? "bg-af-yellow text-black shadow-yellow-glow-sm font-extrabold"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>الأكاديمية // Academy</span>
+              </button>
+            </div>
+          </div>
+
+          {/* روابط التنقل لنسخة الكمبيوتر حسب الوضع النشط */}
+          <div className="hidden xl:flex items-center gap-6 text-xs font-semibold text-af-gray">
+            {!isAcademy ? (
+              <>
+                <button
+                  onClick={() => scrollToSection("assurance")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 01 ]</span>
+                  <span>Assurance</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("configurator")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 02 ]</span>
+                  <span>Services</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("portfolio")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 03 ]</span>
+                  <span>Case Studies</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("why-us")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 04 ]</span>
+                  <span>Why AF</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => scrollToSection("academy-why")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 01 ]</span>
+                  <span>Why Academy</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("courses")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 02 ]</span>
+                  <span>Masterclasses</span>
+                  <span className="text-[9px] bg-af-yellow/20 text-af-yellow border border-af-yellow/40 px-1.5 py-0.2 rounded font-mono font-bold">
+                    HOT
+                  </span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("academy-outcomes")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 03 ]</span>
+                  <span>Outcomes & Certs</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("academy-faq")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 04 ]</span>
+                  <span>FAQ</span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* أزرار السوشيال ميديا وأزرار التحويل */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* أيقونات السوشيال ميديا للكمبيوتر */}
+            <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-white/10">
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-[#1877F2]/20 hover:border-[#1877F2]/50 transition-all"
+                title="Facebook Profile"
+              >
+                <FacebookIcon className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-pink-500/20 hover:border-pink-500/50 transition-all"
+                title="Instagram Account"
+              >
+                <InstagramIcon className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-cyan-400/20 hover:border-cyan-400/50 transition-all"
+                title="TikTok Channel"
+              >
+                <TikTokIcon className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* زر واتساب السريع المباشر */}
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMsg)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all shadow-sm"
+              title="Direct WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </a>
+
+            {/* زر لوحة تحكم الإدارة (يظهر فقط وحصرياً لحساب الأدمن) */}
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="px-3 py-2 rounded-xl bg-af-yellow text-black font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow hover:bg-af-yellow-hover transition-all active:scale-95"
+                title="لوحة تحكم الإدارة"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">لوحة التحكم</span>
+              </a>
+            )}
+
+            {/* زر الإجراء الرئيسي */}
+            {!isAcademy ? (
+              <button
+                onClick={onOpenConfigurator}
+                className="relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">START A PROJECT</span>
+                <span className="sm:hidden text-[11px]">PROJECT</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => scrollToSection("courses")}
+                className="relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95"
+              >
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">EXPLORE TRACKS</span>
+                <span className="sm:hidden text-[11px]">COURSES</span>
+              </button>
+            )}
+
+            {/* زر تسجيل الخروج وتبديل الحساب للكمبيوتر */}
+            {phone && (
+              <button
+                onClick={logout}
+                className="hidden sm:flex p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-300 hover:text-red-400 text-xs font-mono items-center gap-1 transition-colors"
+                title="تسجيل خروج أو تبديل الحساب"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline text-[11px]">خروج</span>
+              </button>
+            )}
+
+            {/* زر القائمة للموبايل */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl bg-af-card border border-white/10 text-af-light hover:text-af-yellow"
+              aria-label="القائمة"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        {/* أزرار السوشيال ميديا وأزرار التحويل */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* أيقونات السوشيال ميديا للكمبيوتر */}
-          <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-white/10">
-            <a
-              href={facebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-[#1877F2]/20 hover:border-[#1877F2]/50 transition-all"
-              title="Facebook Profile"
-            >
-              <FacebookIcon className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href={instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-pink-500/20 hover:border-pink-500/50 transition-all"
-              title="Instagram Account"
-            >
-              <InstagramIcon className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href={tiktokUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-xl bg-af-card border border-white/5 text-af-gray hover:text-white hover:bg-cyan-400/20 hover:border-cyan-400/50 transition-all"
-              title="TikTok Channel"
-            >
-              <TikTokIcon className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          {/* زر واتساب السريع المباشر */}
-          <a
-            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello AF AGENCY, I would like to inquire about your services.")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all shadow-sm"
-            title="Direct WhatsApp"
-          >
-            <MessageCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-          </a>
-
-          {/* زر لوحة تحكم الإدارة (يظهر فقط وحصرياً لحساب الأدمن) */}
-          {isAdmin && (
-            <a
-              href="/admin"
-              className="px-3 py-2 rounded-xl bg-af-yellow text-black font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow hover:bg-af-yellow-hover transition-all active:scale-95"
-              title="لوحة تحكم الإدارة"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>لوحة التحكم</span>
-            </a>
-          )}
-
-          {/* زر صمم باقتك الرئيسي البارز */}
-          <button
-            onClick={onOpenConfigurator}
-            className="relative group overflow-hidden px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>START A PROJECT</span>
-          </button>
-
-          {/* زر تسجيل الخروج وتبديل الحساب للكمبيوتر */}
-          {phone && (
+        {/* شريط التبديل للموبايل مدمج أسفل الهيدر مباشرة لسهولة اللمس بالأصبع */}
+        <div className="lg:hidden pt-2.5 pb-0.5">
+          <div className="w-full max-w-sm mx-auto grid grid-cols-2 p-1 bg-[#0E1118]/90 border border-white/10 rounded-2xl shadow-xl backdrop-blur-xl">
             <button
-              onClick={logout}
-              className="hidden sm:flex p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-300 hover:text-red-400 text-xs font-mono items-center gap-1 transition-colors"
-              title="تسجيل خروج أو تبديل الحساب"
+              onClick={() => setPortalMode("agency")}
+              className={`py-2 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${
+                !isAcademy
+                  ? "bg-af-yellow text-black shadow-yellow-glow-sm font-extrabold"
+                  : "text-gray-400 hover:text-white"
+              }`}
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline text-[11px]">خروج</span>
+              <Briefcase className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">المشاريع // Agency</span>
             </button>
-          )}
-
-          {/* زر القائمة للموبايل */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl bg-af-card border border-white/10 text-af-light hover:text-af-yellow"
-            aria-label="القائمة"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            <button
+              onClick={() => setPortalMode("academy")}
+              className={`py-2 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 ${
+                isAcademy
+                  ? "bg-af-yellow text-black shadow-yellow-glow-sm font-extrabold"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">الأكاديمية // Academy</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* قائمة الموبايل المنبثقة الغنية بحسابات التواصل */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0B0D12]/95 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="lg:hidden bg-[#0B0D12]/98 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
           {/* رابط الإدارة في الموبايل */}
           {isAdmin && (
             <a
@@ -246,58 +361,97 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
               <span className="text-[10px] font-mono opacity-75">{phone}</span>
             </button>
           )}
-          <button
-            onClick={() => scrollToSection("assurance")}
-            className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-af-yellow font-mono">[ 01 ]</span>
-              <span>Zero-Risk Trust // ميثاق الثقة والأمان</span>
-            </div>
-            <ChevronLeft className="w-4 h-4 text-af-muted" />
-          </button>
-          <button
-            onClick={() => scrollToSection("configurator")}
-            className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-af-yellow font-mono">[ 02 ]</span>
-              <span>Services & Configurator // باقات الخدمات</span>
-            </div>
-            <ChevronLeft className="w-4 h-4 text-af-muted" />
-          </button>
-          <button
-            onClick={() => scrollToSection("courses")}
-            className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-af-yellow font-mono">[ 03 ]</span>
-              <span>Academy & AI // أكاديمية الكورسات</span>
-            </div>
-            <span className="text-[10px] bg-af-yellow text-af-dark px-2 py-0.5 rounded font-black">
-              HOT
-            </span>
-          </button>
-          <button
-            onClick={() => scrollToSection("portfolio")}
-            className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-af-yellow font-mono">[ 04 ]</span>
-              <span>Case Studies // سابقة الأعمال</span>
-            </div>
-            <ChevronLeft className="w-4 h-4 text-af-muted" />
-          </button>
-          <button
-            onClick={() => scrollToSection("why-us")}
-            className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-af-yellow font-mono">[ 05 ]</span>
-              <span>Why Choose Us // لماذا نحن؟</span>
-            </div>
-            <ChevronLeft className="w-4 h-4 text-af-muted" />
-          </button>
+
+          {/* روابط القائمة حسب الوضع النشط */}
+          {!isAcademy ? (
+            <>
+              <button
+                onClick={() => scrollToSection("assurance")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 01 ]</span>
+                  <span>Zero-Risk Trust // ميثاق الثقة والأمان</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("configurator")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 02 ]</span>
+                  <span>Services // باقات الخدمات والمشاريع</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("portfolio")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 03 ]</span>
+                  <span>Case Studies // سابقة الأعمال</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("why-us")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 04 ]</span>
+                  <span>Why Choose Us // لماذا نحن؟</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => scrollToSection("academy-why")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 01 ]</span>
+                  <span>Why AF Academy // لماذا الأكاديمية؟</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("courses")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 02 ]</span>
+                  <span>Masterclasses // المسارات التدريبية</span>
+                </div>
+                <span className="text-[10px] bg-af-yellow text-af-dark px-2 py-0.5 rounded font-black">
+                  HOT
+                </span>
+              </button>
+              <button
+                onClick={() => scrollToSection("academy-outcomes")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 03 ]</span>
+                  <span>Outcomes & Certs // الشهادات والمخرجات</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("academy-faq")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 04 ]</span>
+                  <span>FAQ // الأسئلة الشائعة</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+            </>
+          )}
 
           {/* روابط التواصل في الموبايل */}
           <div className="pt-4 border-t border-white/10 space-y-3">
@@ -333,7 +487,7 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
             </div>
 
             <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello AF AGENCY, I would like to inquire about your services.")}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMsg)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3 rounded-xl bg-emerald-500 text-black font-black text-xs flex items-center justify-center gap-2 shadow-lg"

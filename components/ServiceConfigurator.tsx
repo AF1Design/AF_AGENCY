@@ -55,8 +55,11 @@ export default function ServiceConfigurator({ onProceedToOrder }: ServiceConfigu
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const [hasDragged, setHasDragged] = useState(false);
 
-  const currentService = servicesData.find((s) => s.id === activeCategory)!;
-  const currentPackageId = selectedPackages[activeCategory];
+  // حصر الخدمات المعروضة في مخصص باقات المشاريع على خدمات الشركات B2B فقط
+  const businessServices = servicesData.filter((s) => s.id !== "courses");
+  const currentService =
+    businessServices.find((s) => s.id === activeCategory) || businessServices[0];
+  const currentPackageId = selectedPackages[activeCategory] || currentService.packages[0].id;
   const currentPackage =
     currentService.packages.find((p) => p.id === currentPackageId) || currentService.packages[0];
 
@@ -227,18 +230,16 @@ export default function ServiceConfigurator({ onProceedToOrder }: ServiceConfigu
           </p>
         </motion.div>
 
-        {/* أزرار التبديل بين الخدمات الأربعة */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-8">
-          {servicesData.map((service) => {
+        {/* أزرار التبديل بين خدمات الأعمال الثلاث */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 mb-8">
+          {businessServices.map((service) => {
             const isActive = activeCategory === service.id;
             const Icon =
               service.id === "web"
                 ? Globe
                 : service.id === "branding"
                 ? Palette
-                : service.id === "marketing"
-                ? TrendingUp
-                : GraduationCap;
+                : TrendingUp;
 
             return (
               <button
