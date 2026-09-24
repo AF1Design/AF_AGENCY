@@ -16,6 +16,7 @@ import {
   User,
   Phone,
   Layers,
+  GraduationCap,
 } from "lucide-react";
 import { ServiceCategory, RegionCurrency } from "@/types";
 import { useRegion } from "@/context/RegionContext";
@@ -37,8 +38,11 @@ interface OrderModalProps {
 export default function OrderModal({ isOpen, onClose, orderData }: OrderModalProps) {
   const { country, currency, phone: regionPhone } = useRegion();
 
+  const isCourse = orderData?.serviceCategory === "courses";
+
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
+  const [studentStatus, setStudentStatus] = useState("طالب جامعي");
   const [brandName, setBrandName] = useState("");
   const [businessField, setBusinessField] = useState("");
   const [deliveryTimeframe, setDeliveryTimeframe] = useState("من أسبوع إلى أسبوعين");
@@ -59,6 +63,24 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
   const whatsappNumber = "201114687759";
 
   const generateWhatsAppMessage = () => {
+    if (isCourse) {
+      let msg = `COURSE ENROLLMENT INQUIRY // AF ACADEMY\n\n`;
+      msg += `الاسم: ${clientName.trim() || "غير محدد"}\n`;
+      msg += `رقم الهاتف: ${phone.trim()}\n`;
+      msg += `الحالة الدراسية: ${studentStatus}\n`;
+      msg += `الكورس المطلوب: ${orderData.packageName}\n`;
+      if (orderData.estimatedPrice) {
+        msg += `سعر الكورس بالعرض: ${orderData.estimatedPrice}\n`;
+      }
+      msg += `شروط العرض: للطلاب وحديثي التخرج وحتى اكتمال المقاعد\n`;
+      msg += `النطاق الجغرافي: ${country === "EG" ? "مصر (EGP)" : "الخليج الدولي (SAR)"}\n`;
+      if (notes.trim()) {
+        msg += `ملاحظات إضافية:\n${notes.trim()}\n`;
+      }
+      msg += `\nأرجو تأكيد حجز المقعد وتفاصيل بدء التدريب.`;
+      return encodeURIComponent(msg);
+    }
+
     let msg = `PROJECT ORDER INQUIRY // AF AGENCY\n\n`;
     msg += `الاسم: ${clientName.trim() || "غير محدد"}\n`;
     msg += `رقم الهاتف: ${phone.trim()}\n`;
@@ -81,15 +103,21 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !clientName.trim() ||
-      !phone.trim() ||
-      !brandName.trim() ||
-      !businessField.trim() ||
-      !deliveryTimeframe.trim() ||
-      !maxBudget.trim()
-    ) {
-      return;
+    if (isCourse) {
+      if (!clientName.trim() || !phone.trim()) {
+        return;
+      }
+    } else {
+      if (
+        !clientName.trim() ||
+        !phone.trim() ||
+        !brandName.trim() ||
+        !businessField.trim() ||
+        !deliveryTimeframe.trim() ||
+        !maxBudget.trim()
+      ) {
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -101,10 +129,10 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
         body: JSON.stringify({
           clientName: clientName.trim(),
           phone: phone.trim(),
-          brandName: brandName.trim(),
-          businessField: businessField.trim(),
-          deliveryTimeframe: deliveryTimeframe.trim(),
-          maxBudget: maxBudget.trim(),
+          brandName: isCourse ? studentStatus : brandName.trim(),
+          businessField: isCourse ? "حجز كورس تدريبي" : businessField.trim(),
+          deliveryTimeframe: isCourse ? "فوري" : deliveryTimeframe.trim(),
+          maxBudget: isCourse ? (orderData.estimatedPrice || "3000") : maxBudget.trim(),
           country: country === "EG" ? "مصر" : "الخليج العربي",
           currency: orderData.currency || currency,
           serviceCategory: orderData.serviceCategory,
@@ -112,7 +140,7 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
           selectedAddons: orderData.addons,
           clientNotes: notes.trim(),
           leadType: "order",
-          adSource: "AF Agency Portal - Order Modal",
+          adSource: isCourse ? "AF Academy - Course Booking" : "AF Agency Portal - Order Modal",
         }),
       });
 
@@ -148,45 +176,61 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
           <div>
             {/* عنوان وتجهيز الطلب */}
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-af-yellow bg-af-yellow/10 px-3 py-1 rounded-full border border-af-yellow/30 w-fit mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>PROJECT KICKOFF // CONFIRM SCOPE</span>
+              {isCourse ? (
+                <>
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>COURSE ENROLLMENT // AF ACADEMY</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>PROJECT KICKOFF // CONFIRM SCOPE</span>
+                </>
+              )}
             </div>
 
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-1.5">
-              تأكيد بيانات المشروع: <span className="text-af-yellow">{orderData.packageName}</span>
+              {isCourse ? "تأكيد حجز مقعدك في: " : "تأكيد بيانات المشروع: "}
+              <span className="text-af-yellow">{orderData.packageName}</span>
             </h3>
             <p className="text-xs sm:text-sm text-gray-300 mb-5 leading-relaxed">
-              يرجى ملء كافة البيانات المطلوبة ليقوم الخبير المختص بتجهيز العرض الفني ونطاق العمل المخصص لك.
+              {isCourse
+                ? "سجل بياناتك وسيتم التواصل معك مباشرة لتأكيد المقعد وتفاصيل بدء التدريب."
+                : "يرجى ملء كافة البيانات المطلوبة ليقوم الخبير المختص بتجهيز العرض الفني ونطاق العمل المخصص لك."}
             </p>
 
-            {/* ملخص الباقة المحددة مسبقاً */}
+            {/* ملخص الباقة أو الكورس المحدد مسبقاً */}
             <div className="bg-[#06080E] p-4 rounded-2xl border border-white/10 mb-6 text-xs space-y-2">
               <div className="flex justify-between items-center text-gray-200">
-                <span className="text-af-muted">الخدمة المختارة:</span>
-                <span className="font-bold text-white">{orderData.serviceTitle}</span>
-              </div>
-              <div className="flex justify-between items-center text-gray-200">
-                <span className="text-af-muted">الباقة المحددة:</span>
-                <span className="font-bold text-af-yellow font-mono">{orderData.packageName}</span>
+                <span className="text-af-muted">{isCourse ? "الكورس المختار:" : "الخدمة المختارة:"}</span>
+                <span className="font-bold text-white">{orderData.packageName}</span>
               </div>
               {orderData.estimatedPrice && (
                 <div className="flex justify-between items-center text-gray-200 pt-1 border-t border-white/5">
-                  <span className="text-af-muted">التكلفة التقديرية:</span>
+                  <span className="text-af-muted">{isCourse ? "سعر الكورس بالعرض:" : "التكلفة التقديرية:"}</span>
                   <span className="font-bold text-af-yellow font-mono">
                     {orderData.estimatedPrice}
                   </span>
                 </div>
               )}
+              {isCourse && (
+                <div className="flex justify-between items-center text-gray-200 pt-1 border-t border-white/5">
+                  <span className="text-af-muted">شروط العرض:</span>
+                  <span className="font-bold text-emerald-400">
+                    للطلاب وحديثي التخرج وحتى اكتمال المقاعد
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* نموذج الإدخال التفصيلي - كافة الخانات إجبارية */}
+            {/* نموذج الإدخال */}
             <form onSubmit={handleSubmit} className="space-y-4 text-right">
               {/* الصف الأول: الاسم ورقم الهاتف */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-af-yellow" />
-                    <span>الاسم</span>
+                    <span>الاسم بالكامل</span>
                     <span className="text-af-yellow">*</span>
                   </label>
                   <input
@@ -194,6 +238,7 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
                     required
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
+                    placeholder="مثال: أحمد محمد"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
                   />
                 </div>
@@ -209,82 +254,104 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    placeholder="01xxxxxxxxx"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors font-mono"
                     dir="ltr"
                   />
                 </div>
               </div>
 
-              {/* الصف الثاني: اسم البراند أو الشركة ومجال العمل */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {isCourse ? (
                 <div>
                   <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-af-yellow" />
-                    <span>اسم البراند أو الشركة</span>
-                    <span className="text-af-yellow">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={brandName}
-                    onChange={(e) => setBrandName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
-                    <Briefcase className="w-3.5 h-3.5 text-af-yellow" />
-                    <span>المجال</span>
-                    <span className="text-af-yellow">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={businessField}
-                    onChange={(e) => setBusinessField(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* الصف الثالث: وقت تسليم المشروع والميزانية */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-af-yellow" />
-                    <span>وقت تسليم المشروع</span>
+                    <GraduationCap className="w-3.5 h-3.5 text-af-yellow" />
+                    <span>الحالة الدراسية (للاستفادة من خصم العرض)</span>
                     <span className="text-af-yellow">*</span>
                   </label>
                   <select
-                    required
-                    value={deliveryTimeframe}
-                    onChange={(e) => setDeliveryTimeframe(e.target.value)}
+                    value={studentStatus}
+                    onChange={(e) => setStudentStatus(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
                   >
-                    {timeframeOptions.map((opt) => (
-                      <option key={opt} value={opt} className="bg-[#0E1118] text-white">
-                        {opt}
-                      </option>
-                    ))}
+                    <option value="طالب جامعي" className="bg-[#0E1118]">طالب جامعي</option>
+                    <option value="حديث تخرج" className="bg-[#0E1118]">حديث تخرج</option>
+                    <option value="باحث عن تطوير مهاراته المهنية" className="bg-[#0E1118]">باحث عن تطوير مهاراته المهنية</option>
                   </select>
                 </div>
+              ) : (
+                <>
+                  {/* الصف الثاني للشركات: اسم البراند أو الشركة ومجال العمل */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5 text-af-yellow" />
+                        <span>اسم البراند أو الشركة</span>
+                        <span className="text-af-yellow">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={brandName}
+                        onChange={(e) => setBrandName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
-                    <Coins className="w-3.5 h-3.5 text-af-yellow" />
-                    <span>الميزانية التي لا ترغب بتخطيها</span>
-                    <span className="text-af-yellow">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={maxBudget}
-                    onChange={(e) => setMaxBudget(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
-                  />
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5 text-af-yellow" />
+                        <span>المجال</span>
+                        <span className="text-af-yellow">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={businessField}
+                        onChange={(e) => setBusinessField(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* الصف الثالث للشركات: وقت تسليم المشروع والميزانية */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-af-yellow" />
+                        <span>وقت تسليم المشروع</span>
+                        <span className="text-af-yellow">*</span>
+                      </label>
+                      <select
+                        required
+                        value={deliveryTimeframe}
+                        onChange={(e) => setDeliveryTimeframe(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
+                      >
+                        {timeframeOptions.map((opt) => (
+                          <option key={opt} value={opt} className="bg-[#0E1118] text-white">
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-200 mb-1.5 flex items-center gap-1.5">
+                        <Coins className="w-3.5 h-3.5 text-af-yellow" />
+                        <span>الميزانية التي لا ترغب بتخطيها</span>
+                        <span className="text-af-yellow">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={maxBudget}
+                        onChange={(e) => setMaxBudget(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* ملاحظات أو متطلبات خاصة إضافية - اختيارية */}
               <div>

@@ -81,13 +81,14 @@ export default function HomePage() {
     }
   };
 
-  const handleBookCourse = (courseTitle: string) => {
+  const handleBookCourse = (courseTitle: string, priceDisplay?: string) => {
     const courseConfig = {
       serviceCategory: "courses" as ServiceCategory,
-      serviceTitle: "AI & Graphic Design Academy",
+      serviceTitle: "AF ACADEMY",
       packageName: courseTitle,
       packageId: "course-direct-booking",
-      addons: ["Certified Official Credential"],
+      addons: [],
+      estimatedPrice: priceDisplay,
     };
     setCurrentOrder(courseConfig);
     setIsModalOpen(true);
@@ -98,15 +99,15 @@ export default function HomePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName: "مهتم بحجز دورة تدريبية",
+          clientName: "مهتم بحجز كورس تدريبي",
           phone: phone,
           country: country === "EG" ? "مصر" : "الخليج العربي",
           currency: currency,
           serviceCategory: "courses",
-          selectedPackage: courseTitle,
+          selectedPackage: `${courseTitle} (${priceDisplay || ""})`,
           leadType: "intent",
-          adSource: "ضغط على حجز كورس تعليمي",
-          clientNotes: `أبدى اهتماماً بدورة: [${courseTitle}]`,
+          adSource: "ضغط على حجز كورس تدريبي في الأكاديمية",
+          clientNotes: `أبدى اهتماماً بكورس: [${courseTitle}] بسعر [${priceDisplay || ""}]`,
         }),
       }).catch(() => {});
     }
