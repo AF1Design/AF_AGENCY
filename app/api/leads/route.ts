@@ -22,7 +22,13 @@ export async function POST(request: Request) {
       currency,
     } = body;
 
-    if (!phone) {
+    const sanitizedPhone = String(phone || "").trim().slice(0, 30);
+    const sanitizedName = String(clientName || "عميل بدون اسم").trim().slice(0, 100);
+    const sanitizedBrand = String(brandName || "").trim().slice(0, 100);
+    const sanitizedField = String(businessField || "").trim().slice(0, 100);
+    const sanitizedNotes = String(clientNotes || "").trim().slice(0, 1000);
+
+    if (!sanitizedPhone) {
       return NextResponse.json(
         { error: "رقم الهاتف أو الواتساب مطلوب لإتمام الطلب" },
         { status: 400 }
@@ -32,37 +38,37 @@ export async function POST(request: Request) {
     // تحديد نوع السجل: طلب كامل / اهتمام بنقر خدمة / تسجيل بالبوابة
     const determinedType: "order" | "intent" | "registration" =
       leadType ||
-      (brandName || deliveryTimeframe || maxBudget
+      (sanitizedBrand || deliveryTimeframe || maxBudget
         ? "order"
-        : clientName?.includes("تسجيل") || selectedPackage?.includes("بوابة")
+        : sanitizedName.includes("تسجيل") || String(selectedPackage || "").includes("بوابة")
         ? "registration"
         : "intent");
 
     const detailedNotes = [
-      brandName ? `اسم البراند/الشركة: ${brandName}` : null,
-      businessField ? `مجال العمل/المنتجات: ${businessField}` : null,
-      deliveryTimeframe ? `وقت التسليم المطلوب: ${deliveryTimeframe}` : null,
-      maxBudget ? `سقف الميزانية: ${maxBudget}` : null,
-      clientNotes ? `ملاحظات: ${clientNotes}` : null,
+      sanitizedBrand ? `اسم البراند/الشركة: ${sanitizedBrand}` : null,
+      sanitizedField ? `مجال العمل/المنتجات: ${sanitizedField}` : null,
+      deliveryTimeframe ? `وقت التسليم المطلوب: ${String(deliveryTimeframe).slice(0, 80)}` : null,
+      maxBudget ? `سقف الميزانية: ${String(maxBudget).slice(0, 80)}` : null,
+      sanitizedNotes ? `ملاحظات: ${sanitizedNotes}` : null,
     ]
       .filter(Boolean)
       .join(" | ");
 
     const newLead = {
-      client_name: clientName || "عميل بدون اسم",
-      phone: phone,
-      brand_name: brandName || "",
-      business_field: businessField || "",
-      delivery_timeframe: deliveryTimeframe || "",
-      max_budget: maxBudget || "",
-      service_category: serviceCategory || "غير محدد",
-      selected_package: selectedPackage || "غير محدد",
-      selected_addons: selectedAddons || [],
-      client_notes: detailedNotes || clientNotes || "",
-      ad_source: adSource || "مباشر",
+      client_name: sanitizedName,
+      phone: sanitizedPhone,
+      brand_name: sanitizedBrand,
+      business_field: sanitizedField,
+      delivery_timeframe: String(deliveryTimeframe || "").slice(0, 80),
+      max_budget: String(maxBudget || "").slice(0, 80),
+      service_category: String(serviceCategory || "غير محدد").slice(0, 80),
+      selected_package: String(selectedPackage || "غير محدد").slice(0, 120),
+      selected_addons: Array.isArray(selectedAddons) ? selectedAddons.map(a => String(a).slice(0, 80)) : [],
+      client_notes: (detailedNotes || sanitizedNotes).slice(0, 1200),
+      ad_source: String(adSource || "مباشر").slice(0, 80),
       lead_type: determinedType,
-      country: country || (phone.startsWith("01") ? "مصر" : "الخليج العربي"),
-      currency: currency || (phone.startsWith("01") ? "EGP" : "SAR"),
+      country: String(country || (sanitizedPhone.startsWith("01") ? "مصر" : "الخليج العربي")).slice(0, 40),
+      currency: String(currency || (sanitizedPhone.startsWith("01") ? "EGP" : "SAR")).slice(0, 10),
       created_at: new Date().toISOString(),
     };
 

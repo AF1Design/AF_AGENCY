@@ -10,6 +10,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://af-agency.vercel.app"),
   title: "AF AGENCY | Turning Your Dreams Into Reality - Digital Experience Studio",
   description: "مؤسسة رقمية متخصصة في تطوير حلول الويب، تصميم الهويات المؤسسية، إدارة الحملات الإعلانية الموجهة بالأداء، وأكاديمية تدريب الجرافيك ديزاين والذكاء الاصطناعي.",
   keywords: [
@@ -47,6 +48,50 @@ export const metadata: Metadata = {
     shortcut: "/icon.png",
     apple: "/apple-icon.png",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://af-agency.vercel.app",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://af-agency.vercel.app/#organization",
+      name: "AF AGENCY & ACADEMY",
+      url: "https://af-agency.vercel.app",
+      logo: "https://af-agency.vercel.app/images/logo-dark.png",
+      description: "مؤسسة رقمية متخصصة في تطوير حلول الويب، تصميم الهويات المؤسسية، إدارة الحملات الإعلانية، وأكاديمية تدريب الجرافيك ديزاين والذكاء الاصطناعي.",
+      telephone: "+201114687759",
+      sameAs: [
+        "https://www.facebook.com/AF.design.2",
+        "https://www.instagram.com/af_design.1",
+        "https://www.tiktok.com/@af_design1"
+      ]
+    },
+    {
+      "@type": "EducationalOrganization",
+      "@id": "https://af-agency.vercel.app/#academy",
+      name: "AF ACADEMY",
+      url: "https://af-agency.vercel.app/?mode=academy",
+      description: "أكاديمية تدريبية متخصصة في تأهيل الكوادر في الجرافيك ديزاين وصناعة المحتوى الإعلاني بالذكاء الاصطناعي.",
+      parentOrganization: {
+        "@id": "https://af-agency.vercel.app/#organization"
+      }
+    }
+  ]
 };
 
 import Providers from "@/components/Providers";
@@ -69,6 +114,11 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
           rel="stylesheet"
+        />
+        {/* بيانات المخطط الهيكلي لمحركات البحث وجوجل */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="bg-[#060709] text-[#F3F4F6] antialiased min-h-screen selection:bg-af-yellow selection:text-black">

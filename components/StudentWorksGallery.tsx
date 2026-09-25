@@ -52,7 +52,7 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
   const [selectedItem, setSelectedItem] = useState<StudentWorkItem | null>(null);
 
   const studentItems: StudentWorkItem[] = [
-    // قسم فيديوهات وإعلانات الذكاء الاصطناعي مع مشغل داخلي فائق السرعة
+    // قسم فيديوهات وإعلانات الذكاء الاصطناعي عبر البث السحابي المباشر فائق السرعة
     {
       id: "vid-01",
       type: "video",
@@ -136,10 +136,10 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
       categoryLabel: "إعلان تجاري سينمائي للمنتجات",
       filterCategory: "ai-videos",
       software: "AI Fluid & Food Motion",
-      description: "إخراج إعلاني مبهر يجمع بين لقطات تفصيلية لتدفق وانسياب السائل والمكعبات الذهبية لمنتج مورا بنكهة غنية وجذابة.",
-      mediaSrc: "https://youtu.be/CIaTVSr4JBg",
+      description: "إخراج إعلاني مبهر يجمع بين لقطات تفصيلية لتدفق وانسياب السائل والمكعبات الذهبية لمنتج مورا بنكهة غنية وجذابة بعد التعديل الأخير.",
+      mediaSrc: "https://youtu.be/d168bvQX6HY",
       posterImage: "/images/students/poster-mora-ad.jpg",
-      youtubeId: "CIaTVSr4JBg",
+      youtubeId: "d168bvQX6HY",
       aspectRatio: "16/9",
       tags: ["إعلان سينمائي", "مونتاج إعلاني", "ذكاء اصطناعي"],
     },
@@ -355,11 +355,10 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
         </div>
 
         {/* شبكة الأعمال المتجاوبة بالكامل مع صور بوستر حقيقية وفائقة الخفة */}
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
             {filteredItems.map((item) => (
               <motion.div
-                layout
                 key={item.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -476,7 +475,7 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         {/* لافتة دعوة للانضمام والتحويل المباشر لحجز المسارات التدريبية */}
         <div className="mt-14 rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-[#121622] via-[#1A2030] to-[#121622] border border-af-yellow/30 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
@@ -541,37 +540,26 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
                 <X className="w-5 h-5" />
               </button>
 
-              {/* حاوية عرض الميديا: مشغل داخلي بدون مغادرة الموقع وبدون أي بطء */}
-              <div className="relative md:w-3/5 bg-black flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
+              {/* حاوية عرض الميديا: مشغل يوتيوب السحابي الفوري فائق السرعة */}
+              <div className="relative md:w-3/5 bg-black flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px] p-2 sm:p-4">
                 {selectedItem.type === "video" ? (
-                  <div className="w-full h-full flex items-center justify-center p-2 sm:p-4 bg-black">
-                    {selectedItem.youtubeId ? (
-                      <div
-                        className={`w-full relative rounded-2xl overflow-hidden shadow-2xl bg-black ${
-                          selectedItem.aspectRatio === "9/16"
-                            ? "max-w-[290px] aspect-[9/16] mx-auto"
-                            : "aspect-video max-h-[60vh] md:max-h-[480px]"
-                        }`}
-                      >
-                        <iframe
-                          key={selectedItem.youtubeId}
-                          src={`https://www.youtube-nocookie.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
-                          title={selectedItem.title}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          className="w-full h-full border-0 rounded-2xl"
-                        />
-                      </div>
-                    ) : (
-                      <video
-                        key={selectedItem.id}
-                        src={selectedItem.mediaSrc}
-                        controls
-                        autoPlay
-                        playsInline
-                        className="max-h-[60vh] md:max-h-[500px] w-auto max-w-full rounded-xl shadow-2xl"
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div
+                      className={`w-full relative rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10 ${
+                        selectedItem.aspectRatio === "9/16"
+                          ? "max-w-[285px] aspect-[9/16] mx-auto"
+                          : "aspect-video max-h-[58vh] md:max-h-[460px]"
+                      }`}
+                    >
+                      <iframe
+                        key={selectedItem.youtubeId}
+                        src={`https://www.youtube-nocookie.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3`}
+                        title={selectedItem.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="w-full h-full border-0 rounded-2xl"
                       />
-                    )}
+                    </div>
                   </div>
                 ) : (
                   <Image

@@ -127,14 +127,14 @@ export default function HomePage() {
       <Navbar onOpenConfigurator={handleOpenConfigurator} />
 
       {/* عرض الأقسام بسلاسة تامة بناءً على الوضع المختار */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {!isAcademy ? (
           <motion.div
             key="agency-portal"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="w-full"
           >
             {/* واجهة خدمات المشاريع B2B */}
@@ -190,10 +190,10 @@ export default function HomePage() {
         ) : (
           <motion.div
             key="academy-portal"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="w-full"
           >
             {/* واجهة الأكاديمية والتدريب */}

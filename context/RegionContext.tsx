@@ -41,11 +41,8 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
 
     if (savedPhone && savedPhone.trim().length >= 8) {
       setPhone(savedPhone);
-      setIsGateOpen(false);
-    } else {
-      // إذا لم يكن هناك رقم هاتف مسجل أو سليم، تفتح نافذة الاختيار الإلزامية فوراً
-      setIsGateOpen(true);
     }
+    setIsGateOpen(false);
 
     // فحص وضع التصفح المطلوب عبر معلمات الرابط أو التخزين المحلي
     if (typeof window !== "undefined") {
