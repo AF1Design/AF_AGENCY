@@ -7,6 +7,7 @@ import HeroSection from "@/components/HeroSection";
 import AcademyHeroSection from "@/components/AcademyHeroSection";
 import ServiceConfigurator from "@/components/ServiceConfigurator";
 import CoursesSection from "@/components/CoursesSection";
+import StudentWorksGallery from "@/components/StudentWorksGallery";
 import PortfolioShowcase from "@/components/PortfolioShowcase";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import AcademyWhyUs from "@/components/AcademyWhyUs";
@@ -203,6 +204,9 @@ export default function HomePage() {
 
             {/* قسم المسارات التدريبية المتخصصة */}
             <CoursesSection onBookCourse={handleBookCourse} />
+
+            {/* سابقة أعمال وتطبيقات الطلاب كمرجع للمشتركين */}
+            <StudentWorksGallery onBookCourse={handleBookCourse} />
 
             {/* الشهادات والمخرجات التنافسية */}
             <AcademyOutcomes />

@@ -180,17 +180,24 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
                   </span>
                 </button>
                 <button
-                  onClick={() => scrollToSection("academy-outcomes")}
+                  onClick={() => scrollToSection("student-works")}
                   className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
                 >
                   <span className="text-[10px] text-af-yellow/70 font-mono">[ 03 ]</span>
+                  <span>Student Works</span>
+                </button>
+                <button
+                  onClick={() => scrollToSection("academy-outcomes")}
+                  className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 04 ]</span>
                   <span>Outcomes & Certs</span>
                 </button>
                 <button
                   onClick={() => scrollToSection("academy-faq")}
                   className="hover:text-af-yellow transition-colors flex items-center gap-1.5"
                 >
-                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 04 ]</span>
+                  <span className="text-[10px] text-af-yellow/70 font-mono">[ 05 ]</span>
                   <span>FAQ</span>
                 </button>
               </>
@@ -431,11 +438,21 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
                 </span>
               </button>
               <button
-                onClick={() => scrollToSection("academy-outcomes")}
+                onClick={() => scrollToSection("student-works")}
                 className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-af-yellow font-mono">[ 03 ]</span>
+                  <span>Student Works // أعمال الطلاب</span>
+                </div>
+                <ChevronLeft className="w-4 h-4 text-af-muted" />
+              </button>
+              <button
+                onClick={() => scrollToSection("academy-outcomes")}
+                className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-af-yellow font-mono">[ 04 ]</span>
                   <span>Outcomes & Certs // الشهادات والمخرجات</span>
                 </div>
                 <ChevronLeft className="w-4 h-4 text-af-muted" />
@@ -445,7 +462,7 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
                 className="w-full text-right py-2 text-sm font-bold text-af-light hover:text-af-yellow flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-af-yellow font-mono">[ 04 ]</span>
+                  <span className="text-xs text-af-yellow font-mono">[ 05 ]</span>
                   <span>FAQ // الأسئلة الشائعة</span>
                 </div>
                 <ChevronLeft className="w-4 h-4 text-af-muted" />

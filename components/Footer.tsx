@@ -163,7 +163,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <a href="#academy-outcomes" className="hover:text-af-yellow transition-colors">
-                      الشهادات المعتمدة والمخرجات
+                      شهادات الإكمال ومخرجات التدريب
                     </a>
                   </li>
                   <li>

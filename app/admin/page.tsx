@@ -26,20 +26,32 @@ import {
   ChevronUp,
   Globe,
   AlertCircle,
+  GraduationCap,
+  BookOpen,
+  Award,
 } from "lucide-react";
 import { LeadItem } from "@/lib/leadsStore";
 import { useRegion } from "@/context/RegionContext";
-import { categorizeLead, groupLeadsByClient, ClientProfile, SimpleLead } from "@/lib/leadUtils";
+import {
+  categorizeLead,
+  groupLeadsByClient,
+  ClientProfile,
+  SimpleLead,
+  isCourseLead,
+  isB2BLead,
+} from "@/lib/leadUtils";
 
 export default function AdminPage() {
   const { phone, isAdmin, logout, openGate } = useRegion();
 
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"orders" | "clients" | "intent">("orders");
+  const [activeTab, setActiveTab] = useState<"b2b_orders" | "academy_orders" | "clients" | "intent">("b2b_orders");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
+  const [courseFilter, setCourseFilter] = useState<string>("all");
+  const [clientFilter, setClientFilter] = useState<string>("all");
   const [expandedClientPhone, setExpandedClientPhone] = useState<string | null>(null);
 
   const ADMIN_PHONE = "011111111112";
@@ -118,36 +130,61 @@ export default function AdminPage() {
   };
 
   // تصنيف السجلات حسب الأقسام
-  const ordersLeads = useMemo(
+  const allOrdersLeads = useMemo(
     () => leads.filter((l) => categorizeLead(l as SimpleLead) === "order"),
     [leads]
   );
 
+  // 1. طلبات مشاريع الشركات B2B
+  const b2bOrdersLeads = useMemo(
+    () => allOrdersLeads.filter((l) => isB2BLead(l as SimpleLead)),
+    [allOrdersLeads]
+  );
+
+  // 2. طلبات وحجوزات تدريب الأكاديمية (الكورسات)
+  const academyOrdersLeads = useMemo(
+    () => allOrdersLeads.filter((l) => isCourseLead(l as SimpleLead)),
+    [allOrdersLeads]
+  );
+
+  // 3. السجلات المتروكة والنقرات (سلة متروكة)
   const intentLeads = useMemo(
     () => leads.filter((l) => categorizeLead(l as SimpleLead) !== "order"),
     [leads]
   );
 
+  // 4. قاعدة بيانات العملاء والطلاب المسجلين
   const clientsList = useMemo(
     () => groupLeadsByClient(leads as SimpleLead[]),
     [leads]
   );
 
-  // إحصائيات الطلبات
-  const ordersStats = useMemo(() => {
+  // إحصائيات طلبات مشاريع الشركات B2B
+  const b2bStats = useMemo(() => {
     return {
-      total: ordersLeads.length,
-      newOrders: ordersLeads.filter((l) => l.status === "new").length,
-      inProgress: ordersLeads.filter((l) => l.status === "contacted" || l.status === "in_progress").length,
-      completed: ordersLeads.filter((l) => l.status === "completed").length,
+      total: b2bOrdersLeads.length,
+      newOrders: b2bOrdersLeads.filter((l) => l.status === "new").length,
+      inProgress: b2bOrdersLeads.filter((l) => l.status === "contacted" || l.status === "in_progress").length,
+      completed: b2bOrdersLeads.filter((l) => l.status === "completed").length,
     };
-  }, [ordersLeads]);
+  }, [b2bOrdersLeads]);
 
-  // إحصائيات العملاء
+  // إحصائيات حجوزات تدريب الأكاديمية (الكورسات)
+  const academyStats = useMemo(() => {
+    return {
+      total: academyOrdersLeads.length,
+      newOrders: academyOrdersLeads.filter((l) => l.status === "new").length,
+      inProgress: academyOrdersLeads.filter((l) => l.status === "contacted" || l.status === "in_progress").length,
+      completed: academyOrdersLeads.filter((l) => l.status === "completed").length,
+    };
+  }, [academyOrdersLeads]);
+
+  // إحصائيات العملاء والطلاب
   const clientsStats = useMemo(() => {
     return {
       total: clientsList.length,
-      active: clientsList.filter((c) => c.totalOrders > 0).length,
+      b2bClients: clientsList.filter((c) => c.b2bCount > 0).length,
+      academyStudents: clientsList.filter((c) => c.academyCount > 0).length,
       potential: clientsList.filter((c) => c.totalOrders === 0).length,
       egypt: clientsList.filter((c) => c.country.includes("مصر") || c.phone.startsWith("01")).length,
       gulf: clientsList.filter((c) => !c.country.includes("مصر") && !c.phone.startsWith("01")).length,
@@ -169,35 +206,45 @@ export default function AdminPage() {
 
     const headers = [
       "المعرف",
-      "النوع",
+      "تصنيف السجل",
       "تاريخ السجل",
       "الاسم",
       "رقم الهاتف",
-      "اسم البراند",
-      "مجال العمل",
+      "اسم البراند / صفة الطالب",
+      "مجال العمل / النشاط",
       "وقت التسليم",
-      "الميزانية",
+      "الميزانية / الرسوم",
       "الخدمة",
-      "الباقة",
+      "الباقة / الكورس",
       "الحالة",
       "الملاحظات",
     ];
 
-    const rows = leads.map((l) => [
-      `"${l.id}"`,
-      `"${categorizeLead(l as SimpleLead) === "order" ? "طلب مؤكد" : "اهتمام / سلة متروكة"}"`,
-      `"${new Date(l.created_at).toLocaleString("ar-EG")}"`,
-      `"${l.client_name || ""}"`,
-      `"${l.phone || ""}"`,
-      `"${l.brand_name || ""}"`,
-      `"${l.business_field || ""}"`,
-      `"${l.delivery_timeframe || ""}"`,
-      `"${l.max_budget || ""}"`,
-      `"${l.service_category || ""}"`,
-      `"${l.selected_package || ""}"`,
-      `"${l.status || ""}"`,
-      `"${(l.client_notes || "").replace(/"/g, '""')}"`,
-    ]);
+    const rows = leads.map((l) => {
+      const isOrd = categorizeLead(l as SimpleLead) === "order";
+      const isCrs = isCourseLead(l as SimpleLead);
+      const typeLabel = isCrs
+        ? "حجز تدريب (أكاديمية)"
+        : isOrd
+        ? "مشروع شركات (B2B)"
+        : "اهتمام / سلة متروكة";
+
+      return [
+        `"${l.id}"`,
+        `"${typeLabel}"`,
+        `"${new Date(l.created_at).toLocaleString("ar-EG")}"`,
+        `"${l.client_name || ""}"`,
+        `"${l.phone || ""}"`,
+        `"${l.brand_name || ""}"`,
+        `"${l.business_field || ""}"`,
+        `"${l.delivery_timeframe || ""}"`,
+        `"${l.max_budget || ""}"`,
+        `"${l.service_category || ""}"`,
+        `"${l.selected_package || ""}"`,
+        `"${l.status || ""}"`,
+        `"${(l.client_notes || "").replace(/"/g, '""')}"`,
+      ];
+    });
 
     const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -210,9 +257,9 @@ export default function AdminPage() {
     document.body.removeChild(link);
   };
 
-  // فلترة الطلبات
-  const filteredOrders = useMemo(() => {
-    return ordersLeads.filter((lead) => {
+  // فلترة طلبات مشاريع الشركات B2B
+  const filteredB2BOrders = useMemo(() => {
+    return b2bOrdersLeads.filter((lead) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -227,21 +274,59 @@ export default function AdminPage() {
 
       return matchesSearch && matchesStatus && matchesService;
     });
-  }, [ordersLeads, searchQuery, statusFilter, serviceFilter]);
+  }, [b2bOrdersLeads, searchQuery, statusFilter, serviceFilter]);
 
-  // فلترة العملاء
+  // فلترة حجوزات تدريب الأكاديمية (الكورسات)
+  const filteredAcademyOrders = useMemo(() => {
+    return academyOrdersLeads.filter((lead) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        lead.client_name?.toLowerCase().includes(q) ||
+        lead.phone?.toLowerCase().includes(q) ||
+        lead.selected_package?.toLowerCase().includes(q) ||
+        lead.brand_name?.toLowerCase().includes(q) ||
+        lead.client_notes?.toLowerCase().includes(q);
+
+      const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+
+      let matchesCourse = true;
+      const pkg = (lead.selected_package || "").toLowerCase();
+      if (courseFilter === "graphic") {
+        matchesCourse = pkg.includes("جرافيك") || pkg.includes("فوتوشوب") || pkg.includes("graphic");
+      } else if (courseFilter === "ai") {
+        matchesCourse = pkg.includes("ذكاء") || pkg.includes("ai") || pkg.includes("فيديو");
+      } else if (courseFilter === "pro") {
+        matchesCourse = pkg.includes("البرو") || pkg.includes("pro");
+      }
+
+      return matchesSearch && matchesStatus && matchesCourse;
+    });
+  }, [academyOrdersLeads, searchQuery, statusFilter, courseFilter]);
+
+  // فلترة العملاء والطلاب
   const filteredClients = useMemo(() => {
     return clientsList.filter((client) => {
       const q = searchQuery.toLowerCase().trim();
-      if (!q) return true;
-      return (
+      const matchesSearch =
+        !q ||
         client.name.toLowerCase().includes(q) ||
         client.phone.toLowerCase().includes(q) ||
         client.brandName?.toLowerCase().includes(q) ||
-        client.businessField?.toLowerCase().includes(q)
-      );
+        client.businessField?.toLowerCase().includes(q);
+
+      let matchesType = true;
+      if (clientFilter === "b2b") {
+        matchesType = client.b2bCount > 0;
+      } else if (clientFilter === "academy") {
+        matchesType = client.academyCount > 0;
+      } else if (clientFilter === "visitor") {
+        matchesType = client.totalOrders === 0;
+      }
+
+      return matchesSearch && matchesType;
     });
-  }, [clientsList, searchQuery]);
+  }, [clientsList, searchQuery, clientFilter]);
 
   // فلترة المهتمين بالخدمات (سلة متروكة)
   const filteredIntents = useMemo(() => {
@@ -369,38 +454,65 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* الصف الثاني: شريط أقسام الهيدر الرئيسية الثلاثة بحجم وسط متناسق */}
+          {/* الصف الثاني: شريط أقسام الهيدر الرئيسية الأربعة بحجم متناسق */}
           <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-white/10">
-            {/* القسم 1: إدارة الطلبات المؤكدة */}
+            {/* القسم 1: مشاريع الشركات B2B */}
             <button
               onClick={() => {
-                setActiveTab("orders");
+                setActiveTab("b2b_orders");
                 setSearchQuery("");
                 setStatusFilter("all");
+                setServiceFilter("all");
               }}
               className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === "orders"
+                activeTab === "b2b_orders"
                   ? "bg-af-yellow text-black shadow-yellow-glow-sm"
                   : "bg-white/5 hover:bg-white/10 text-gray-200 border border-white/15"
               }`}
             >
-              <ShoppingBag className="w-4 h-4" />
-              <span>قسم إدارة الطلبات</span>
+              <Briefcase className="w-4 h-4" />
+              <span>مشاريع الشركات (B2B)</span>
               <span
                 className={`px-2 py-0.5 rounded-full text-xs font-black ${
-                  activeTab === "orders" ? "bg-black text-white" : "bg-white/15 text-af-yellow"
+                  activeTab === "b2b_orders" ? "bg-black text-white" : "bg-white/15 text-af-yellow"
                 }`}
               >
-                {ordersLeads.length}
+                {b2bOrdersLeads.length}
               </span>
             </button>
 
-            {/* القسم 2: بيانات العملاء والعدد المسجل */}
+            {/* القسم 2: حجوزات تدريب الأكاديمية (الكورسات) */}
+            <button
+              onClick={() => {
+                setActiveTab("academy_orders");
+                setSearchQuery("");
+                setStatusFilter("all");
+                setCourseFilter("all");
+              }}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === "academy_orders"
+                  ? "bg-af-yellow text-black shadow-yellow-glow-sm"
+                  : "bg-white/5 hover:bg-white/10 text-gray-200 border border-white/15"
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>حجوزات الأكاديمية (الكورسات)</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                  activeTab === "academy_orders" ? "bg-black text-white" : "bg-white/15 text-af-yellow"
+                }`}
+              >
+                {academyOrdersLeads.length}
+              </span>
+            </button>
+
+            {/* القسم 3: بيانات العملاء والطلاب المسجلين */}
             <button
               onClick={() => {
                 setActiveTab("clients");
                 setSearchQuery("");
                 setStatusFilter("all");
+                setClientFilter("all");
               }}
               className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === "clients"
@@ -409,17 +521,17 @@ export default function AdminPage() {
               }`}
             >
               <Users className="w-4 h-4" />
-              <span>بيانات العملاء المسجلين</span>
+              <span>بيانات العملاء والطلاب</span>
               <span
                 className={`px-2 py-0.5 rounded-full text-xs font-black ${
                   activeTab === "clients" ? "bg-black text-white" : "bg-white/15 text-af-yellow"
                 }`}
               >
-                {clientsList.length} عميل
+                {clientsList.length} مسجل
               </span>
             </button>
 
-            {/* القسم 3: العملاء الذين ضغطوا على الخدمات بدون تأكيد (سلة متروكة) */}
+            {/* القسم 4: العملاء الذين ضغطوا على الخدمات بدون تأكيد (سلة متروكة) */}
             <button
               onClick={() => {
                 setActiveTab("intent");
@@ -448,45 +560,45 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
         {/* ========================================================= */}
-        {/* التبويب الأول: قسم إدارة الطلبات المؤكدة                     */}
+        {/* التبويب الأول: قسم إدارة مشاريع الشركات (B2B)               */}
         {/* ========================================================= */}
-        {activeTab === "orders" && (
+        {activeTab === "b2b_orders" && (
           <div className="space-y-6 animate-in fade-in duration-150">
-            {/* بطاقات إحصائيات الطلبات بحجم وسط متناسق */}
+            {/* بطاقات إحصائيات مشاريع الشركات */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">إجمالي الطلبات المؤكدة</span>
-                  <Layers className="w-4 h-4 text-af-yellow" />
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">إجمالي مشاريع الشركات</span>
+                  <Briefcase className="w-4 h-4 text-af-yellow" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-white font-mono leading-none my-1">
-                  {ordersStats.total}
+                  {b2bStats.total}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
-                  طلبات استكمل أصحابها النموذج
+                  مشاريع شركات وعلامات تجارية
                 </div>
               </div>
 
               <div className="bg-[#0A0D14] border border-af-yellow/40 rounded-2xl p-4 sm:p-5 shadow-yellow-glow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-af-yellow">بانتظار التواصل</span>
+                  <span className="text-xs sm:text-sm font-bold text-af-yellow">بانتظار التواصل والبدء</span>
                   <Sparkles className="w-4 h-4 text-af-yellow" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-af-yellow font-mono leading-none my-1">
-                  {ordersStats.newOrders}
+                  {b2bStats.newOrders}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-300 font-medium mt-1">
-                  طلبات جديدة غير متواصل معها
+                  مشاريع جديدة غير متواصل معها
                 </div>
               </div>
 
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">قيد المتابعة والتنفيذ</span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">قيد التنفيذ والمتابعة</span>
                   <Clock className="w-4 h-4 text-amber-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono leading-none my-1">
-                  {ordersStats.inProgress}
+                  {b2bStats.inProgress}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
                   مشاريع جاري إنجازها
@@ -495,11 +607,11 @@ export default function AdminPage() {
 
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">المشاريع المكتملة</span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">مشاريع مكتملة ومسلمة</span>
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono leading-none my-1">
-                  {ordersStats.completed}
+                  {b2bStats.completed}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
                   تم تسليمها واعتمادها بنجاح
@@ -507,7 +619,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* شريط البحث والتصفية للطلبات */}
+            {/* شريط البحث والتصفية لمشاريع الشركات */}
             <div className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-af-yellow absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -515,7 +627,7 @@ export default function AdminPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحث بالاسم، برقم الهاتف، باسم البراند، أو اسم الباقة..."
+                  placeholder="ابحث باسم العميل، الهاتف، اسم الشركة أو البراند، أو الباقة..."
                   className="w-full pr-10 pl-3 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-white text-xs sm:text-sm focus:outline-none focus:border-af-yellow transition-colors placeholder:text-gray-500 font-medium"
                 />
               </div>
@@ -539,11 +651,10 @@ export default function AdminPage() {
                   onChange={(e) => setServiceFilter(e.target.value)}
                   className="px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-af-yellow cursor-pointer"
                 >
-                  <option value="all">كافة الخدمات</option>
-                  <option value="web">تطوير الويب</option>
-                  <option value="branding">الهوية والتصميم</option>
-                  <option value="marketing">التسويق والإعلانات</option>
-                  <option value="courses">الأكاديمية والذكاء الاصطناعي</option>
+                  <option value="all">كافة مجالات B2B</option>
+                  <option value="web">تطوير المواقع والأنظمة</option>
+                  <option value="branding">الهوية البصرية والتصميم</option>
+                  <option value="marketing">التسويق وحملات النمو</option>
                 </select>
               </div>
             </div>
@@ -551,23 +662,23 @@ export default function AdminPage() {
             {/* عدد النتائج */}
             <div className="flex items-center justify-between text-xs sm:text-sm text-gray-300 px-1 font-bold">
               <span>
-                عرض <strong className="text-af-yellow">{filteredOrders.length}</strong> من إجمالي{" "}
-                <strong className="text-white">{ordersLeads.length}</strong> طلب مؤكد
+                عرض <strong className="text-af-yellow">{filteredB2BOrders.length}</strong> من إجمالي{" "}
+                <strong className="text-white">{b2bOrdersLeads.length}</strong> مشروع شركات (B2B)
               </span>
             </div>
 
-            {/* قائمة كروت الطلبات */}
-            {filteredOrders.length === 0 ? (
+            {/* قائمة كروت مشاريع الشركات */}
+            {filteredB2BOrders.length === 0 ? (
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-10 text-center text-gray-300 space-y-3">
-                <Layers className="w-10 h-10 mx-auto text-af-yellow/40" />
-                <h3 className="text-base sm:text-lg font-bold text-white">لا توجد طلبات مطابقة للبحث</h3>
+                <Briefcase className="w-10 h-10 mx-auto text-af-yellow/40" />
+                <h3 className="text-base sm:text-lg font-bold text-white">لا توجد مشاريع شركات مطابقة للبحث</h3>
                 <p className="text-xs sm:text-sm text-gray-400">
-                  لم يتم العثور على طلبات تطابق معايير البحث أو الفرز المحددة.
+                  لم يتم العثور على طلبات شركات تطابق معايير البحث أو الفرز المحددة.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredOrders.map((lead) => {
+                {filteredB2BOrders.map((lead) => {
                   const formattedDate = new Date(lead.created_at).toLocaleDateString("ar-EG", {
                     year: "numeric",
                     month: "short",
@@ -577,7 +688,7 @@ export default function AdminPage() {
                   });
 
                   const whatsappMsg = encodeURIComponent(
-                    `مرحباً بك أستاذ ${lead.client_name}، معك إدارة AF AGENCY بخصوص طلبك لباقة [${lead.selected_package}]. يسعدنا بدء الترتيبات الفنية لتنفيذ مشروعك.`
+                    `مرحباً بك أستاذ ${lead.client_name}، معك إدارة AF AGENCY بخصوص طلب مشروع [${lead.selected_package}]. يسعدنا بدء الترتيبات الفنية لتنفيذ مشروعك.`
                   );
 
                   return (
@@ -734,41 +845,335 @@ export default function AdminPage() {
         )}
 
         {/* ========================================================= */}
+        {/* التبويب الثاني: قسم حجوزات تدريب الأكاديمية (الكورسات)        */}
+        {/* ========================================================= */}
+        {activeTab === "academy_orders" && (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* بطاقات إحصائيات حجوزات الكورسات */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">إجمالي حجوزات التدريب</span>
+                  <GraduationCap className="w-4 h-4 text-af-yellow" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-white font-mono leading-none my-1">
+                  {academyStats.total}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
+                  طلبات التحاق بكورسات الأكاديمية
+                </div>
+              </div>
+
+              <div className="bg-[#0A0D14] border border-af-yellow/40 rounded-2xl p-4 sm:p-5 shadow-yellow-glow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-bold text-af-yellow">حجوزات جديدة بانتظار التأكيد</span>
+                  <Sparkles className="w-4 h-4 text-af-yellow" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-af-yellow font-mono leading-none my-1">
+                  {academyStats.newOrders}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-300 font-medium mt-1">
+                  طلاب بانتظار التواصل لتثبيت المقعد
+                </div>
+              </div>
+
+              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">مقاعد تم تأكيدها وتواصلها</span>
+                  <Clock className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono leading-none my-1">
+                  {academyStats.inProgress}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
+                  قيد إعداد مواعيد التدريب
+                </div>
+              </div>
+
+              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">اشتراكات مؤكدة ومكتملة</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono leading-none my-1">
+                  {academyStats.completed}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
+                  ملتحقون بالبرامج التدريبية
+                </div>
+              </div>
+            </div>
+
+            {/* شريط البحث والتصفية لحجوزات الكورسات */}
+            <div className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-af-yellow absolute right-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="ابحث باسم الطالب، الهاتف، الكورس، أو الحالة (طالب جامعي / حديث تخرج)..."
+                  className="w-full pr-10 pl-3 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-white text-xs sm:text-sm focus:outline-none focus:border-af-yellow transition-colors placeholder:text-gray-500 font-medium"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-af-yellow cursor-pointer"
+                >
+                  <option value="all">كافة الحالات</option>
+                  <option value="new">حجز جديد (بانتظار التواصل)</option>
+                  <option value="contacted">تم التواصل والتأكيد</option>
+                  <option value="in_progress">قيد التدريب</option>
+                  <option value="completed">مكتمل</option>
+                  <option value="cancelled">ملغي</option>
+                </select>
+
+                <select
+                  value={courseFilter}
+                  onChange={(e) => setCourseFilter(e.target.value)}
+                  className="px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-af-yellow cursor-pointer"
+                >
+                  <option value="all">كافة مسارات التدريب</option>
+                  <option value="graphic">أساسيات الجرافيك ديزاين (فوتوشوب + إليستريتور)</option>
+                  <option value="ai">الذكاء الاصطناعي (الفيديوهات والإعلانات)</option>
+                  <option value="pro">الكورس البرو (جرافيك + ذكاء اصطناعي)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* عدد النتائج */}
+            <div className="flex items-center justify-between text-xs sm:text-sm text-gray-300 px-1 font-bold">
+              <span>
+                عرض <strong className="text-af-yellow">{filteredAcademyOrders.length}</strong> من إجمالي{" "}
+                <strong className="text-white">{academyOrdersLeads.length}</strong> حجز تدريبي للأكاديمية
+              </span>
+            </div>
+
+            {/* قائمة كروت حجوزات الكورسات */}
+            {filteredAcademyOrders.length === 0 ? (
+              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-10 text-center text-gray-300 space-y-3">
+                <GraduationCap className="w-10 h-10 mx-auto text-af-yellow/40" />
+                <h3 className="text-base sm:text-lg font-bold text-white">لا توجد حجوزات تدريب مطابقة للبحث</h3>
+                <p className="text-xs sm:text-sm text-gray-400">
+                  لم يتم العثور على حجوزات تطابق معايير البحث أو المسار التدريبي المحدد.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredAcademyOrders.map((lead) => {
+                  const formattedDate = new Date(lead.created_at).toLocaleDateString("ar-EG", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  const studentStatus = lead.brand_name || "طالب / خريج";
+
+                  const whatsappMsg = encodeURIComponent(
+                    `مرحباً بك يا ${lead.client_name}، معك إدارة AF ACADEMY بخصوص حجزك في [${lead.selected_package}]. يسعدنا تأكيد مقعدك وتزويدك بكافة تفاصيل مواعيد التدريب والبدء.`
+                  );
+
+                  return (
+                    <div
+                      key={lead.id}
+                      className={`bg-[#0A0D14] border rounded-2xl p-5 sm:p-6 transition-all duration-200 hover:border-white/30 ${
+                        lead.status === "new"
+                          ? "border-cyan-500/50 bg-[#07131D]"
+                          : "border-white/10"
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h2 className="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
+                              <GraduationCap className="w-5 h-5 text-cyan-400" />
+                              <span>{lead.client_name}</span>
+                            </h2>
+                            {lead.status === "new" && (
+                              <span className="text-xs font-black bg-cyan-400 text-black px-2.5 py-0.5 rounded-full shadow-sm">
+                                حجز جديد
+                              </span>
+                            )}
+                            <span className="text-xs font-bold bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 px-2.5 py-0.5 rounded-full">
+                              {studentStatus}
+                            </span>
+                            <span className="text-xs font-bold font-mono text-gray-400">
+                              {formattedDate}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-xs sm:text-sm text-gray-200 flex-wrap font-bold">
+                            <span className="font-mono text-af-yellow text-base sm:text-lg font-black" dir="ltr">
+                              {lead.phone}
+                            </span>
+                            <span className="text-gray-300 font-medium">
+                              المصدر: {lead.ad_source || "بوابة الأكاديمية"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=${whatsappMsg}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all active:scale-95"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                            <span>تأكيد الحجز WhatsApp</span>
+                          </a>
+
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-colors"
+                          >
+                            <Phone className="w-4 h-4" />
+                            <span>اتصال</span>
+                          </a>
+
+                          <select
+                            value={lead.status}
+                            onChange={(e) =>
+                              handleStatusChange(lead.id, e.target.value as LeadItem["status"])
+                            }
+                            className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border focus:outline-none transition-colors cursor-pointer ${
+                              lead.status === "new"
+                                ? "bg-cyan-500 text-black border-cyan-400"
+                                : lead.status === "contacted"
+                                ? "bg-purple-500/30 text-purple-200 border-purple-400"
+                                : lead.status === "in_progress"
+                                ? "bg-amber-500/30 text-amber-200 border-amber-400"
+                                : lead.status === "completed"
+                                ? "bg-emerald-500/30 text-emerald-200 border-emerald-400"
+                                : "bg-red-500/30 text-red-200 border-red-400"
+                            }`}
+                          >
+                            <option value="new" className="bg-[#0A0D14] text-white">حجز جديد</option>
+                            <option value="contacted" className="bg-[#0A0D14] text-white">تم تأكيد المقعد</option>
+                            <option value="in_progress" className="bg-[#0A0D14] text-white">قيد التدريب</option>
+                            <option value="completed" className="bg-[#0A0D14] text-white">مكتمل</option>
+                            <option value="cancelled" className="bg-[#0A0D14] text-white">ملغي</option>
+                          </select>
+
+                          <button
+                            onClick={() => handleDeleteLead(lead.id)}
+                            className="p-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-400 hover:text-red-400 transition-colors"
+                            title="حذف الحجز"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* بطاقة تفاصيل الكورس المحجوز */}
+                      <div className="mt-4 p-4 rounded-xl bg-[#06080E] border border-cyan-500/25 space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="space-y-1">
+                            <span className="text-cyan-400 block text-xs font-bold">
+                              المسار التدريبي المحجوز:
+                            </span>
+                            <span className="text-base sm:text-lg font-black text-white block">
+                              {lead.selected_package}
+                            </span>
+                          </div>
+
+                          <div className="text-left sm:text-right shrink-0">
+                            <span className="text-gray-400 block text-xs font-bold">
+                              رسوم الكورس بالعرض:
+                            </span>
+                            <span className="text-lg sm:text-xl font-mono font-black text-af-yellow flex items-center gap-1 sm:justify-end">
+                              <Coins className="w-4 h-4 text-af-yellow" />
+                              <span>
+                                {lead.max_budget
+                                  ? lead.max_budget.includes("ج.م")
+                                    ? lead.max_budget
+                                    : `${lead.max_budget} ج.م`
+                                  : "حسب العرض"}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-gray-300">
+                          <span className="text-emerald-400 font-bold">
+                            عرض خاص للطلاب وحديثي التخرج وحتى اكتمال المقاعد
+                          </span>
+                          <span className="text-gray-400">
+                            الصفة المسجلة: <strong className="text-white">{studentStatus}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      {lead.client_notes && (
+                        <div className="mt-3 p-3.5 rounded-xl bg-[#06080E] border border-white/10 text-xs sm:text-sm text-gray-100">
+                          <span className="text-cyan-400 block text-xs font-bold mb-1">
+                            ملاحظات المتدرب:
+                          </span>
+                          <p className="leading-relaxed font-medium text-gray-200">{lead.client_notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
         {/* التبويب الثاني: قسم بيانات العملاء والعدد المسجل            */}
         {/* ========================================================= */}
         {activeTab === "clients" && (
           <div className="space-y-6 animate-in fade-in duration-150">
-            {/* بطاقات إحصائيات قاعدة بيانات العملاء */}
+            {/* بطاقات إحصائيات قاعدة بيانات العملاء والطلاب */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="bg-[#0A0D14] border border-af-yellow/40 rounded-2xl p-4 sm:p-5 shadow-yellow-glow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-af-yellow">إجمالي العملاء المسجلين</span>
+                  <span className="text-xs sm:text-sm font-bold text-af-yellow">إجمالي المسجلين</span>
                   <Users className="w-4 h-4 text-af-yellow" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-af-yellow font-mono leading-none my-1">
                   {clientsStats.total}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-300 font-medium mt-1">
-                  عميل مسجل برقم هاتف في النظام
+                  شامل أرقام الشركات والطلاب والزوار
                 </div>
               </div>
 
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">عملاء بطلبات مؤكدة</span>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">عملاء مشاريع B2B</span>
+                  <Briefcase className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono leading-none my-1">
-                  {clientsStats.active}
+                  {clientsStats.b2bClients}
                 </div>
                 <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
-                  عملاء أكملوا طلبات فعلية
+                  أصحاب شركات طلبوا مشاريع
                 </div>
               </div>
 
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">مسجلون بالبوابة (فرص)</span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">طلاب الأكاديمية</span>
+                  <GraduationCap className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono leading-none my-1">
+                  {clientsStats.academyStudents}
+                </div>
+                <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
+                  حجزوا مسارات تدريبية
+                </div>
+              </div>
+
+              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-bold text-gray-300">زوار البوابة (فرص)</span>
                   <Sparkles className="w-4 h-4 text-amber-400" />
                 </div>
                 <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono leading-none my-1">
@@ -778,51 +1183,50 @@ export default function AdminPage() {
                   سجلوا أرقامهم دون طلب بعد
                 </div>
               </div>
-
-              <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-bold text-gray-300">توزيع النطاق الجغرافي</span>
-                  <Globe className="w-4 h-4 text-cyan-400" />
-                </div>
-                <div className="text-lg sm:text-xl font-black text-white leading-tight my-1">
-                  <span className="text-af-yellow">{clientsStats.egypt}</span> مصر /{" "}
-                  <span className="text-emerald-400">{clientsStats.gulf}</span> الخليج
-                </div>
-                <div className="text-[11px] sm:text-xs text-gray-400 font-medium mt-1">
-                  حسب خوادم وبوابة النطاق
-                </div>
-              </div>
             </div>
 
-            {/* شريط البحث في العملاء */}
-            <div className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl shadow-sm">
-              <div className="relative">
+            {/* شريط البحث والفلترة في العملاء والطلاب */}
+            <div className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+              <div className="relative flex-1">
                 <Search className="w-4 h-4 text-af-yellow absolute right-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحث برقم هاتف العميل، بالاسم، أو باسم البراند..."
+                  placeholder="ابحث برقم الهاتف، بالاسم، أو باسم الشركة أو البراند..."
                   className="w-full pr-10 pl-3 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-white text-xs sm:text-sm focus:outline-none focus:border-af-yellow transition-colors placeholder:text-gray-500 font-medium"
                 />
               </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                <select
+                  value={clientFilter}
+                  onChange={(e) => setClientFilter(e.target.value)}
+                  className="px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/15 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-af-yellow cursor-pointer"
+                >
+                  <option value="all">كافة المسجلين</option>
+                  <option value="b2b">عملاء مشاريع شركات B2B</option>
+                  <option value="academy">طلاب الأكاديمية (الكورسات)</option>
+                  <option value="visitor">زوار البوابة (بدون طلبات بعد)</option>
+                </select>
+              </div>
             </div>
 
-            {/* عدد العملاء */}
+            {/* عدد العملاء والطلاب */}
             <div className="flex items-center justify-between text-xs sm:text-sm text-gray-300 px-1 font-bold">
               <span>
                 عرض <strong className="text-af-yellow">{filteredClients.length}</strong> من إجمالي{" "}
-                <strong className="text-white">{clientsList.length}</strong> عميل مسجل
+                <strong className="text-white">{clientsList.length}</strong> مسجل في النظام
               </span>
             </div>
 
-            {/* قائمة كروت العملاء المسجلين */}
+            {/* قائمة كروت العملاء والطلاب */}
             {filteredClients.length === 0 ? (
               <div className="bg-[#0A0D14] border border-white/10 rounded-2xl p-10 text-center text-gray-300 space-y-3">
                 <Users className="w-10 h-10 mx-auto text-af-yellow/40" />
-                <h3 className="text-base sm:text-lg font-bold text-white">لا يوجد عملاء مطابقون للبحث</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">لا يوجد مسجلون مطابقون للبحث</h3>
                 <p className="text-xs sm:text-sm text-gray-400">
-                  لم يتم العثور على أرقام هواتف أو أسماء تطابق معايير البحث.
+                  لم يتم العثور على أرقام هواتف أو أسماء تطابق معايير البحث والفلترة.
                 </p>
               </div>
             ) : (
@@ -843,7 +1247,9 @@ export default function AdminPage() {
                   });
 
                   const whatsappClientMsg = encodeURIComponent(
-                    `مرحباً بك أستاذ ${client.name}، معك إدارة AF AGENCY بخصوص حسابك واهتماماتك عبر المنصة. يسعدنا تقديم استشارة ومساعدتك في تطوير مشروعك.`
+                    client.academyCount > 0 && client.b2bCount === 0
+                      ? `مرحباً بك يا ${client.name}، معك إدارة AF ACADEMY بخصوص حسابك وتدريبك معنا. يسعدنا متابعتك والرد على أي استفسارات لديك.`
+                      : `مرحباً بك أستاذ ${client.name}، معك إدارة AF AGENCY بخصوص حسابك واهتماماتك عبر المنصة. يسعدنا تقديم استشارة ومساعدتك في تطوير وتوسيع مشروعك.`
                   );
 
                   return (
@@ -853,19 +1259,31 @@ export default function AdminPage() {
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/10">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-3 flex-wrap">
+                          <div className="flex items-center gap-2.5 flex-wrap">
                             <h2 className="text-lg sm:text-xl font-black text-white">
                               {client.name}
                             </h2>
-                            {client.totalOrders > 0 ? (
-                              <span className="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-                                عميل مؤكد ({client.totalOrders} طلب)
+
+                            {client.b2bCount > 0 && (
+                              <span className="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <Briefcase className="w-3 h-3" />
+                                <span>عميل شركات B2B ({client.b2bCount})</span>
                               </span>
-                            ) : (
+                            )}
+
+                            {client.academyCount > 0 && (
+                              <span className="text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <GraduationCap className="w-3 h-3" />
+                                <span>طالب بالأكاديمية ({client.academyCount})</span>
+                              </span>
+                            )}
+
+                            {client.totalOrders === 0 && (
                               <span className="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
                                 مسجل بالبوابة
                               </span>
                             )}
+
                             <span className="text-xs font-bold text-gray-300 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10">
                               {client.country}
                             </span>
@@ -929,28 +1347,28 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                         <div className="bg-[#06080E] p-3 rounded-xl border border-white/10">
                           <span className="text-gray-400 block text-[11px] sm:text-xs font-bold mb-0.5">
-                            الطلبات المؤكدة:
+                            مشاريع B2B:
                           </span>
                           <span className="font-black text-white text-sm sm:text-base">
-                            {client.totalOrders} طلب
+                            {client.b2bCount} مشروع
                           </span>
                         </div>
 
                         <div className="bg-[#06080E] p-3 rounded-xl border border-white/10">
                           <span className="text-gray-400 block text-[11px] sm:text-xs font-bold mb-0.5">
-                            نقرات الخدمات والاهتمامات:
+                            حجوزات الكورسات:
+                          </span>
+                          <span className="font-black text-cyan-400 text-sm sm:text-base">
+                            {client.academyCount} كورس
+                          </span>
+                        </div>
+
+                        <div className="bg-[#06080E] p-3 rounded-xl border border-white/10">
+                          <span className="text-gray-400 block text-[11px] sm:text-xs font-bold mb-0.5">
+                            نقرات واهتمامات:
                           </span>
                           <span className="font-black text-af-yellow text-sm sm:text-base">
                             {client.totalIntents} تفاعل
-                          </span>
-                        </div>
-
-                        <div className="bg-[#06080E] p-3 rounded-xl border border-white/10">
-                          <span className="text-gray-400 block text-[11px] sm:text-xs font-bold mb-0.5">
-                            تاريخ أول تسجيل:
-                          </span>
-                          <span className="font-bold text-gray-200 text-xs sm:text-sm">
-                            {firstDateFormatted}
                           </span>
                         </div>
 
@@ -964,38 +1382,56 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* السجل الموسع لنشاط هذا العميل */}
+                      {/* السجل الموسع لنشاط هذا المسجل */}
                       {isExpanded && (
                         <div className="mt-4 pt-4 border-t border-white/10 space-y-3 animate-in fade-in">
                           <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
                             <Clock className="w-4 h-4 text-af-yellow" />
-                            <span>سجل كافة طلبات ونقرات هذا العميل:</span>
+                            <span>سجل كافة طلبات ونشاطات هذا المستخدم:</span>
                           </h4>
 
                           <div className="space-y-2">
-                            {client.orders.map((ord) => (
-                              <div
-                                key={ord.id}
-                                className="p-3 rounded-xl bg-[#06080E] border border-emerald-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                              >
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-black bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
-                                      طلب مؤكد
-                                    </span>
-                                    <span className="font-bold text-white text-xs sm:text-sm">
-                                      {ord.selected_package}
-                                    </span>
+                            {client.orders.map((ord) => {
+                              const isCourse = isCourseLead(ord as SimpleLead);
+                              return (
+                                <div
+                                  key={ord.id}
+                                  className={`p-3 rounded-xl bg-[#06080E] border flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                                    isCourse ? "border-cyan-500/30" : "border-emerald-500/30"
+                                  }`}
+                                >
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      {isCourse ? (
+                                        <span className="text-[11px] font-black bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                          <GraduationCap className="w-3 h-3" />
+                                          <span>حجز كورس بالأكاديمية</span>
+                                        </span>
+                                      ) : (
+                                        <span className="text-[11px] font-black bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                          <Briefcase className="w-3 h-3" />
+                                          <span>مشروع شركات B2B</span>
+                                        </span>
+                                      )}
+                                      <span className="font-bold text-white text-xs sm:text-sm">
+                                        {ord.selected_package}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-gray-300 mt-1">
+                                      {ord.client_notes || (isCourse ? "حجز مقعد تدريبي" : "طلب مشروع متكامل")}
+                                      {ord.max_budget && (
+                                        <span className="text-af-yellow font-mono mr-2">
+                                          ({ord.max_budget})
+                                        </span>
+                                      )}
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-gray-300 mt-1">
-                                    {ord.client_notes || "طلب مشروع متكامل"}
-                                  </p>
+                                  <div className="text-[11px] font-mono text-gray-400">
+                                    {new Date(ord.created_at).toLocaleString("ar-EG")}
+                                  </div>
                                 </div>
-                                <div className="text-[11px] font-mono text-gray-400">
-                                  {new Date(ord.created_at).toLocaleString("ar-EG")}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
 
                             {client.intents.map((intn) => (
                               <div

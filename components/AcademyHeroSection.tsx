@@ -109,8 +109,8 @@ export default function AcademyHeroSection({
                 <Award className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-white font-bold text-xs sm:text-sm truncate">Verified Certificate</p>
-                <p className="text-af-muted text-[10px] sm:text-[11px] truncate">شهادة إتمام معتمدة</p>
+                <p className="text-white font-bold text-xs sm:text-sm truncate">Completion Certificate</p>
+                <p className="text-af-muted text-[10px] sm:text-[11px] truncate">شهادة إكمال التدريب</p>
               </div>
             </div>
           </div>

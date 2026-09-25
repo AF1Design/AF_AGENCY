@@ -38,6 +38,36 @@ export function categorizeLead(lead: SimpleLead): LeadType {
   return "intent";
 }
 
+export function isCourseLead(lead: SimpleLead): boolean {
+  if (lead.service_category === "courses") return true;
+  const pkg = (lead.selected_package || "").toLowerCase();
+  const notes = (lead.client_notes || "").toLowerCase();
+  const source = (lead.ad_source || "").toLowerCase();
+  const field = (lead.business_field || "").toLowerCase();
+
+  return (
+    pkg.includes("كورس") ||
+    pkg.includes("course") ||
+    pkg.includes("جرافيك ديزاين") ||
+    pkg.includes("graphic design") ||
+    pkg.includes("ذكاء اصطناعي") ||
+    pkg.includes("ai") ||
+    pkg.includes("دبلومة") ||
+    pkg.includes("diploma") ||
+    pkg.includes("البرو") ||
+    source.includes("academy") ||
+    source.includes("كورس") ||
+    field.includes("كورس") ||
+    field.includes("تدريب") ||
+    notes.includes("كورس") ||
+    notes.includes("دورة")
+  );
+}
+
+export function isB2BLead(lead: SimpleLead): boolean {
+  return !isCourseLead(lead);
+}
+
 export interface ClientProfile {
   phone: string;
   name: string;
@@ -52,6 +82,9 @@ export interface ClientProfile {
   firstSeen: string;
   lastSeen: string;
   status: "active_client" | "potential_lead";
+  clientType: "b2b" | "academy" | "both" | "visitor";
+  b2bCount: number;
+  academyCount: number;
 }
 
 export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
@@ -62,6 +95,7 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
     if (!rawPhone) continue;
 
     const leadType = categorizeLead(lead);
+    const isCourse = isCourseLead(lead);
 
     if (!clientMap.has(rawPhone)) {
       clientMap.set(rawPhone, {
@@ -75,11 +109,14 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
         currency: lead.currency || (rawPhone.startsWith("01") ? "EGP" : "SAR"),
         totalOrders: 0,
         totalIntents: 0,
+        b2bCount: 0,
+        academyCount: 0,
         orders: [],
         intents: [],
         firstSeen: lead.created_at,
         lastSeen: lead.created_at,
         status: "potential_lead",
+        clientType: "visitor",
       });
     }
 
@@ -111,9 +148,24 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
       profile.totalOrders += 1;
       profile.orders.push(lead);
       profile.status = "active_client";
+      if (isCourse) {
+        profile.academyCount += 1;
+      } else {
+        profile.b2bCount += 1;
+      }
     } else {
       profile.totalIntents += 1;
       profile.intents.push(lead);
+    }
+
+    if (profile.b2bCount > 0 && profile.academyCount > 0) {
+      profile.clientType = "both";
+    } else if (profile.academyCount > 0) {
+      profile.clientType = "academy";
+    } else if (profile.b2bCount > 0) {
+      profile.clientType = "b2b";
+    } else {
+      profile.clientType = isCourse ? "academy" : "visitor";
     }
   }
 
