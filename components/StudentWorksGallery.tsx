@@ -36,6 +36,8 @@ interface StudentWorkItem {
   description: string;
   mediaSrc: string;
   posterImage?: string;
+  youtubeId?: string;
+  aspectRatio?: "16/9" | "9/16";
   tags: string[];
 }
 
@@ -50,84 +52,96 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
   const [selectedItem, setSelectedItem] = useState<StudentWorkItem | null>(null);
 
   const studentItems: StudentWorkItem[] = [
-    // قسم فيديوهات وإعلانات الذكاء الاصطناعي مع صور بوستر حقيقية مستخرجة من داخل كل فيديو
+    // قسم فيديوهات وإعلانات الذكاء الاصطناعي مع مشغل داخلي فائق السرعة
     {
       id: "vid-01",
       type: "video",
       track: "ai",
-      title: "إعلان تجاري - منتجات العناية BARE",
-      categoryLabel: "فيديو إعلاني بالذكاء الاصطناعي",
+      title: "إعلان تجاري فاخر - برفيوم ملكي",
+      categoryLabel: "إعلان عطور ومنتجات فاخرة",
       filterCategory: "ai-videos",
-      software: "AI Video & Ads",
-      description: "صناعة إعلان تجاري بأسلوب محتوى المستخدم الواقعي مع محاكاة حركة الكاميرا وتوزيع الإضاءة الرقمية لزيادة مبيعات المتاجر.",
-      mediaSrc: "/videos/bare-ugc.mp4",
-      posterImage: "/images/students/poster-bare-ugc.jpg",
-      tags: ["ذكاء اصطناعي", "إعلانات تجارية", "تسويق رقمي"],
+      software: "AI Cinematic Render",
+      description: "صياغة مشهد بصري فخم يبرز تفاصيل عبوة العطر الذهبية مع تأثيرات الإضاءة السينمائية وموسيقى إعلانية راقية.",
+      mediaSrc: "https://youtu.be/41wDY0Iy3R0",
+      posterImage: "/images/students/poster-royal-perfume.jpg",
+      youtubeId: "41wDY0Iy3R0",
+      aspectRatio: "16/9",
+      tags: ["منتجات فاخرة", "إضاءة سينمائية", "ذكاء اصطناعي"],
     },
     {
       id: "vid-02",
       type: "video",
       track: "ai",
-      title: "إعلان تسويقي سينمائي - علامة MORA",
-      categoryLabel: "إعلان تجاري سينمائي",
+      title: "إعلان شيبسي مبتكر - كرة القدم الأمريكية",
+      categoryLabel: "حملات إعلانية حركية",
       filterCategory: "ai-videos",
-      software: "AI Generation & Editing",
-      description: "إخراج إعلاني بأسلوب سينمائي يجمع بين لقطات تفصيلية للمنتجات ومؤثرات صوتية متناسقة لرفع معدل التحويل.",
-      mediaSrc: "/videos/mora-ad.mp4",
-      posterImage: "/images/students/poster-mora-ad.jpg",
-      tags: ["إعلان سينمائي", "مونتاج إعلاني", "ذكاء اصطناعي"],
+      software: "AI Motion & Creative Ads",
+      description: "فكرة إعلانية إبداعية تدمج حماس مباريات كرة القدم الأمريكية وأجواء الاستاد مع المنتج بحركة كاميرا درامية.",
+      mediaSrc: "https://youtu.be/xGczsnfxB4E",
+      posterImage: "/images/students/poster-creative-canvas.jpg",
+      youtubeId: "xGczsnfxB4E",
+      aspectRatio: "16/9",
+      tags: ["حملات تجارية", "مؤثرات سينمائية", "ذكاء اصطناعي"],
     },
     {
       id: "vid-03",
       type: "video",
       track: "ai",
-      title: "إعلان رياضي ديناميكي - Nike Best",
-      categoryLabel: "إعلان رياضي حركي",
+      title: "إعلان رياضي حركي - نايكي (Nike)",
+      categoryLabel: "إعلانات رياضية عالمية",
       filterCategory: "ai-videos",
       software: "AI Motion & Video",
-      description: "تصميم وتوليد لقطات حركية فائقة الحيوية تتناسب مع وتيرة الإعلانات الرياضية العالمية ومقاسات منصات التواصل الاجتماعي.",
-      mediaSrc: "/videos/nike-ad.mp4",
+      description: "تصميم وتوليد لقطات حركية فائقة الحيوية للرياضي وكوتش نايك في غرفة الملابس مع مؤثرات احترافية لعلامة نايكي.",
+      mediaSrc: "https://youtu.be/BS7pKFDWaYM",
       posterImage: "/images/students/poster-nike-ad.jpg",
+      youtubeId: "BS7pKFDWaYM",
+      aspectRatio: "16/9",
       tags: ["حملات رياضية", "إعلان حركي", "سوشيال ميديا"],
     },
     {
       id: "vid-04",
       type: "video",
       track: "ai",
-      title: "موشن جرافيك إعلاني تفاعلي - استوديو التصميم",
-      categoryLabel: "موشن جرافيك وإعلانات تفاعلية",
+      title: "إعلان تفاعلي (UGC) - بالعربية",
+      categoryLabel: "محتوى إعلاني تفاعلي (UGC)",
       filterCategory: "ai-videos",
-      software: "AI & Motion Tools",
-      description: "تطبيق متقدم على استعراض النماذج ثلاثية الأبعاد والمشاريع الرقمية بتنقلات بصرية جذابة وسريعة لجذب انتباه العملاء.",
-      mediaSrc: "/videos/creative-canvas.mp4",
-      posterImage: "/images/students/poster-creative-canvas.jpg",
-      tags: ["موشن جرافيك", "عرض مشاريع", "تأثيرات بصرية"],
+      software: "AI Digital Avatar & Voice",
+      description: "صناعة إعلان واقعي بأسلوب تجارب المستخدمين الموثوقة يخاطب الجمهور العربي مباشرة على تيك توك وإنستغرام ريلز.",
+      mediaSrc: "https://youtube.com/shorts/mCCawqVBzi0",
+      posterImage: "/images/students/poster-ugc-promo.jpg",
+      youtubeId: "mCCawqVBzi0",
+      aspectRatio: "9/16",
+      tags: ["فيديو تيك توك", "ريلز إنستغرام", "إعلانات تفاعلية"],
     },
     {
       id: "vid-05",
       type: "video",
       track: "ai",
-      title: "إعلان تفاعلي ترويجي - UGC Promo",
-      categoryLabel: "فيديو إعلاني تفاعلي",
+      title: "إعلان تجاري عالمي (UGC) - بالإنجليزية",
+      categoryLabel: "محتوى إعلاني عالمي (UGC)",
       filterCategory: "ai-videos",
       software: "AI Video Creation",
-      description: "إنتاج مقطع فيديو إعلاني تفاعلي يخاطب اهتمامات الجمهور مباشرة ويحقق أعلى نسب مشاهدة على تيك توك وإنستغرام ريلز.",
-      mediaSrc: "/videos/ugc-promo.mp4",
-      posterImage: "/images/students/poster-ugc-promo.jpg",
-      tags: ["فيديو تيك توك", "ريلز إنستغرام", "إعلانات تفاعلية"],
+      description: "إنتاج محتوى إعلاني تفاعلي موجه للأسواق العالمية لمتاجر التجارة الإلكترونية ومنتجات العناية بالبشرة BARE.",
+      mediaSrc: "https://youtube.com/shorts/-dfARcOxVd8",
+      posterImage: "/images/students/poster-bare-ugc.jpg",
+      youtubeId: "-dfARcOxVd8",
+      aspectRatio: "9/16",
+      tags: ["ذكاء اصطناعي", "إعلانات تجارية", "تسويق رقمي"],
     },
     {
       id: "vid-06",
       type: "video",
       track: "ai",
-      title: "إعلان منتجات فاخرة - برفيوم ملكي",
-      categoryLabel: "إعلان عطور ومنتجات فاخرة",
+      title: "إعلان تسويقي سينمائي - زبادي مورا",
+      categoryLabel: "إعلان تجاري سينمائي للمنتجات",
       filterCategory: "ai-videos",
-      software: "AI Cinematic Render",
-      description: "صياغة مشهد بصري فخم ومثير يبرز عبوة العطر مع تأثيرات الدخان والضوء السينمائي وموسيقى إعلانية راقية.",
-      mediaSrc: "/videos/royal-perfume.mp4",
-      posterImage: "/images/students/poster-royal-perfume.jpg",
-      tags: ["منتجات فاخرة", "إضاءة سينمائية", "ذكاء اصطناعي"],
+      software: "AI Fluid & Food Motion",
+      description: "إخراج إعلاني مبهر يجمع بين لقطات تفصيلية لتدفق وانسياب السائل والمكعبات الذهبية لمنتج مورا بنكهة غنية وجذابة.",
+      mediaSrc: "https://youtu.be/CIaTVSr4JBg",
+      posterImage: "/images/students/poster-mora-ad.jpg",
+      youtubeId: "CIaTVSr4JBg",
+      aspectRatio: "16/9",
+      tags: ["إعلان سينمائي", "مونتاج إعلاني", "ذكاء اصطناعي"],
     },
 
     // قسم تصاميم الجرافيك ديزاين
@@ -387,7 +401,7 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
                           <Play className="w-7 h-7 fill-black ml-1" />
                         </div>
                         <span className="text-[11px] font-mono text-white mt-2.5 bg-black/70 backdrop-blur-sm px-3 py-0.5 rounded-full border border-white/15 shadow-md">
-                          تشغيل الفيديو HD
+                          مشاهدة الفيديو
                         </span>
                       </div>
 
@@ -395,9 +409,9 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
                       <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between text-xs text-gray-300 pt-1.5 border-t border-white/10">
                         <span className="flex items-center gap-1 text-[11px]">
                           <Film className="w-3 h-3 text-af-yellow" />
-                          <span>AI Video // 1080p</span>
+                          <span>{item.aspectRatio === "9/16" ? "Shorts / Reel" : "Commercial HD"}</span>
                         </span>
-                        <span className="text-[10px] text-af-yellow font-mono font-bold">WATCH</span>
+                        <span className="text-[10px] text-af-yellow font-mono font-bold">PLAY</span>
                       </div>
                     </div>
                   ) : (
@@ -501,7 +515,7 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
         </div>
       </div>
 
-      {/* نافذة المعاينة المكبرة عالية الدقة - يتم تشغيل الفيديو المطلوب فقط بشكل منفرد بانسيابية تامة */}
+      {/* نافذة المعاينة المكبرة عالية الدقة - مشغل داخلي سينمائي نقي بدون أي إعلانات وبسرعة بث خارقة */}
       <AnimatePresence>
         {selectedItem && (
           <motion.div
@@ -527,18 +541,37 @@ export default function StudentWorksGallery({ onBookCourse }: StudentWorksGaller
                 <X className="w-5 h-5" />
               </button>
 
-              {/* حاوية عرض الميديا: تشغيل فيديو مفرد بانسيابية أو صورة مفردة */}
+              {/* حاوية عرض الميديا: مشغل داخلي بدون مغادرة الموقع وبدون أي بطء */}
               <div className="relative md:w-3/5 bg-black flex items-center justify-center min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
                 {selectedItem.type === "video" ? (
-                  <div className="w-full h-full flex items-center justify-center p-2 bg-black">
-                    <video
-                      key={selectedItem.id}
-                      src={selectedItem.mediaSrc}
-                      controls
-                      autoPlay
-                      playsInline
-                      className="max-h-[60vh] md:max-h-[500px] w-auto max-w-full rounded-xl shadow-2xl"
-                    />
+                  <div className="w-full h-full flex items-center justify-center p-2 sm:p-4 bg-black">
+                    {selectedItem.youtubeId ? (
+                      <div
+                        className={`w-full relative rounded-2xl overflow-hidden shadow-2xl bg-black ${
+                          selectedItem.aspectRatio === "9/16"
+                            ? "max-w-[290px] aspect-[9/16] mx-auto"
+                            : "aspect-video max-h-[60vh] md:max-h-[480px]"
+                        }`}
+                      >
+                        <iframe
+                          key={selectedItem.youtubeId}
+                          src={`https://www.youtube-nocookie.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+                          title={selectedItem.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="w-full h-full border-0 rounded-2xl"
+                        />
+                      </div>
+                    ) : (
+                      <video
+                        key={selectedItem.id}
+                        src={selectedItem.mediaSrc}
+                        controls
+                        autoPlay
+                        playsInline
+                        className="max-h-[60vh] md:max-h-[500px] w-auto max-w-full rounded-xl shadow-2xl"
+                      />
+                    )}
                   </div>
                 ) : (
                   <Image
