@@ -23,7 +23,7 @@ import { MessageCircle, GraduationCap, Briefcase, ArrowLeft } from "lucide-react
 import { trackEvent, trackCustomEvent } from "@/lib/fpixel";
 
 export default function HomePage() {
-  const { phone, country, currency, portalMode, setPortalMode } = useRegion();
+  const { phone, clientName, country, currency, portalMode, setPortalMode } = useRegion();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -85,11 +85,12 @@ export default function HomePage() {
 
     // تسجيل نقرة العميل على الباقة كاهتمام في حال لم يؤكد الطلب
     if (phone && phone !== "011111111112") {
+      const verifiedName = clientName?.trim() || `عميل (${phone})`;
       fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName: "عميل مهتم (ضغط على الباقة ولم يؤكد)",
+          clientName: verifiedName,
           phone: phone,
           country: country === "EG" ? "مصر" : "الخليج العربي",
           currency: currency,
@@ -98,7 +99,7 @@ export default function HomePage() {
           selectedAddons: config.addons,
           leadType: "intent",
           adSource: "ضغط على الباقة وفتح نافذة الحجز",
-          clientNotes: `أبدى اهتماماً بالباقة: [${config.packageName}] للخدمة: [${config.serviceTitle}]`,
+          clientNotes: `العميل [${verifiedName}] أبدى اهتماماً بالباقة: [${config.packageName}] للخدمة: [${config.serviceTitle}]`,
         }),
       }).catch(() => {});
     }
@@ -125,11 +126,12 @@ export default function HomePage() {
 
     // تسجيل اهتمام الكورس
     if (phone && phone !== "011111111112") {
+      const verifiedName = clientName?.trim() || `عميل (${phone})`;
       fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName: "مهتم بحجز كورس تدريبي",
+          clientName: verifiedName,
           phone: phone,
           country: country === "EG" ? "مصر" : "الخليج العربي",
           currency: currency,
@@ -137,7 +139,7 @@ export default function HomePage() {
           selectedPackage: `${courseTitle} (${priceDisplay || ""})`,
           leadType: "intent",
           adSource: "ضغط على حجز كورس تدريبي في الأكاديمية",
-          clientNotes: `أبدى اهتماماً بكورس: [${courseTitle}] بسعر [${priceDisplay || ""}]`,
+          clientNotes: `العميل [${verifiedName}] أبدى اهتماماً بكورس: [${courseTitle}] بسعر [${priceDisplay || ""}]`,
         }),
       }).catch(() => {});
     }

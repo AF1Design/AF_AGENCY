@@ -7,12 +7,14 @@ interface RegionContextType {
   country: CountryCode;
   currency: RegionCurrency;
   phone: string;
+  clientName: string;
   isAdmin: boolean;
   isGateOpen: boolean;
   portalMode: PortalMode;
   setPortalMode: (mode: PortalMode) => void;
   togglePortalMode: () => void;
-  setRegion: (country: CountryCode, userPhone?: string) => void;
+  setRegion: (country: CountryCode, userPhone?: string, userName?: string) => void;
+  setClientName: (name: string) => void;
   toggleCurrency: () => void;
   openGate: () => void;
   closeGate: () => void;
@@ -25,6 +27,7 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
   const [country, setCountry] = useState<CountryCode>("EG");
   const [currency, setCurrency] = useState<RegionCurrency>("EGP");
   const [phone, setPhone] = useState<string>("");
+  const [clientName, setClientName] = useState<string>("");
   const [isGateOpen, setIsGateOpen] = useState(false);
   const [portalMode, setPortalModeState] = useState<PortalMode>("agency");
 
@@ -32,6 +35,7 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
     const savedCountry = localStorage.getItem("af_country") as CountryCode | null;
     const savedCurrency = localStorage.getItem("af_currency") as RegionCurrency | null;
     const savedPhone = localStorage.getItem("af_phone") || "";
+    const savedName = localStorage.getItem("af_client_name") || "";
     const gatePassed = localStorage.getItem("af_gate_passed");
 
     if (savedCountry && (savedCountry === "EG" || savedCountry === "GULF")) {
@@ -39,10 +43,24 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
       setCurrency(savedCurrency || (savedCountry === "EG" ? "EGP" : "SAR"));
     }
 
-    if (savedPhone && savedPhone.trim().length >= 8) {
-      setPhone(savedPhone);
+    if (savedName) {
+      setClientName(savedName);
     }
-    setIsGateOpen(false);
+
+    // إلزامي صارم: لا يمكن فتح الموقع والتصفح إلا إذا كان العميل مسجلاً اسمه ورقم هاتفه مع اجتياز البوابة
+    if (
+      savedPhone &&
+      savedPhone.trim().length >= 8 &&
+      savedName &&
+      savedName.trim().length >= 2 &&
+      gatePassed === "true"
+    ) {
+      setPhone(savedPhone);
+      setClientName(savedName);
+      setIsGateOpen(false);
+    } else {
+      setIsGateOpen(true);
+    }
 
     // فحص وضع التصفح المطلوب عبر معلمات الرابط أو التخزين المحلي
     if (typeof window !== "undefined") {
@@ -79,40 +97,22 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
     setPortalMode(nextMode);
   };
 
-  const setRegion = (newCountry: CountryCode, userPhone?: string) => {
+  const setRegion = (newCountry: CountryCode, userPhone?: string, userName?: string) => {
     const newCurrency: RegionCurrency = newCountry === "EG" ? "EGP" : "SAR";
     setCountry(newCountry);
     setCurrency(newCurrency);
-    if (userPhone) {
-      setPhone(userPhone);
-      localStorage.setItem("af_phone", userPhone);
+    if (userName && userName.trim()) {
+      setClientName(userName.trim());
+      localStorage.setItem("af_client_name", userName.trim());
+    }
+    if (userPhone && userPhone.trim()) {
+      setPhone(userPhone.trim());
+      localStorage.setItem("af_phone", userPhone.trim());
     }
     localStorage.setItem("af_country", newCountry);
     localStorage.setItem("af_currency", newCurrency);
     localStorage.setItem("af_gate_passed", "true");
     setIsGateOpen(false);
-
-    // تسجيل فوري لبيانات العميل في قاعدة البيانات لضمان عدم ضياع أي ليد من الإعلانات
-    if (userPhone && userPhone.trim()) {
-      try {
-        fetch("/api/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clientName: "زائر استكشاف أسعار",
-            phone: userPhone.trim(),
-            country: newCountry === "EG" ? "مصر" : "الخليج العربي",
-            currency: newCurrency,
-            serviceCategory: "web",
-            selectedPackage: "استعراض باقات الويب",
-            selectedAddons: [],
-            adSource: "بوابة تحديد الدولة والأسعار (Welcome Gate)",
-          }),
-        }).catch(() => {});
-      } catch (err) {
-        // Ignore error
-      }
-    }
   };
 
   const toggleCurrency = () => {
@@ -129,7 +129,9 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setPhone("");
+    setClientName("");
     localStorage.removeItem("af_phone");
+    localStorage.removeItem("af_client_name");
     localStorage.removeItem("af_gate_passed");
     setIsGateOpen(true);
   };
@@ -146,12 +148,14 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
         country,
         currency,
         phone,
+        clientName,
         isAdmin,
         isGateOpen,
         portalMode,
         setPortalMode,
         togglePortalMode,
         setRegion,
+        setClientName,
         toggleCurrency,
         openGate,
         closeGate,

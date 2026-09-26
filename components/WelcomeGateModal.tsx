@@ -1,25 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "@/context/RegionContext";
 import { CountryCode } from "@/types";
-import { Sparkles, ArrowLeft, Phone, CheckCircle2, Server, ShieldCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, Phone, User, CheckCircle2, Server, ShieldCheck, Loader2 } from "lucide-react";
 
 export default function WelcomeGateModal() {
   const { isGateOpen, setRegion } = useRegion();
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>("EG");
+  const [inputName, setInputName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [inputPhone, setInputPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // قفل التمرير بالكامل في الصفحة طالما البوابة مفتوحة لمنع أي تصفح خلفي
+  useEffect(() => {
+    if (isGateOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isGateOpen]);
+
   if (!isGateOpen) return null;
+
+  const validateName = (nameStr: string) => {
+    const cleaned = nameStr.trim();
+    if (!cleaned) return "يرجى إدخال اسمك بالكامل للمتابعة.";
+    if (cleaned.length < 3) return "يرجى إدخال اسم صحيح مكون من 3 أحرف على الأقل.";
+    return "";
+  };
 
   const validatePhone = (phoneStr: string, country: CountryCode) => {
     const cleaned = phoneStr.replace(/\s+/g, "");
     if (!cleaned) return "يرجى إدخال رقم الهاتف للمتابعة.";
 
-    // رقم هاتف الأدمن معتمد ومقبول دائماً
+    // رقم هاتف الإدارة معتمد ومقبول دائماً
     if (cleaned === "011111111112") {
       return "";
     }
@@ -30,8 +51,8 @@ export default function WelcomeGateModal() {
         return "يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقماً يبدأ بـ 01";
       }
     } else {
-      // أرقام الخليج تبدأ عادة بـ 5 وتتراوح بين 8 إلى 10 أرقام
-      if (cleaned.length < 8 || cleaned.length > 12) {
+      // أرقام الخليج تبدأ عادة بـ 5 وتتراوح بين 8 إلى 12 رقماً
+      if (cleaned.length < 8 || cleaned.length > 14) {
         return "يرجى إدخال رقم هاتف خليجي صحيح.";
       }
     }
@@ -45,38 +66,47 @@ export default function WelcomeGateModal() {
         document.activeElement.blur();
       }
     }
-    const errorMsg = validatePhone(inputPhone, selectedCountry);
-    if (errorMsg) {
-      setPhoneError(errorMsg);
+
+    const nErr = validateName(inputName);
+    const pErr = validatePhone(inputPhone, selectedCountry);
+
+    if (nErr) setNameError(nErr);
+    if (pErr) setPhoneError(pErr);
+
+    if (nErr || pErr) {
       return;
     }
 
+    setNameError("");
     setPhoneError("");
     setIsSubmitting(true);
 
+    const cleanName = inputName.trim();
+    const cleanPhone = inputPhone.trim();
+
     try {
-      // إرسال الليد فوراً للوحة التحكم وقاعدة البيانات
+      // إرسال بيانات العميل فوراً لقاعدة البيانات ولوحة التحكم
       await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName: "تسجيل دخول جديد (بوابة البنية التحتية)",
-          phone: inputPhone.trim(),
+          clientName: cleanName,
+          phone: cleanPhone,
           country: selectedCountry === "EG" ? "مصر" : "الخليج العربي",
           currency: selectedCountry === "EG" ? "EGP" : "SAR",
           serviceCategory: "web",
-          selectedPackage: "بوابة تحديد النطاق والسيرفرات",
+          selectedPackage: "بوابة تحديد النطاق والأسعار",
           selectedAddons: [],
-          clientNotes: `عميل سجل من بوابة النطاق الجغرافي: [${selectedCountry === "EG" ? "خوادم مصر" : "خوادم الخليج الدولي"}]`,
+          clientNotes: `تسجيل عميل جديد من بوابة الدخول: [الاسم: ${cleanName}] - [الهاتف: ${cleanPhone}] - [النطاق: ${selectedCountry === "EG" ? "خوادم مصر" : "خوادم الخليج"}]`,
           leadType: "registration",
           adSource: "بوابة الدخول الرئيسية (Welcome Gate)",
         }),
       });
     } catch (err) {
-      // Continue even if network error so user isn't stuck
+      // Continue so the user is not stuck on network error
     }
 
-    setRegion(selectedCountry, inputPhone.trim());
+    setRegion(selectedCountry, cleanPhone, cleanName);
     setIsSubmitting(false);
 
     if (typeof window !== "undefined") {
@@ -180,6 +210,37 @@ export default function WelcomeGateModal() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* إدخال الاسم بالكامل الإلزامي */}
+              <div>
+                <label className="block text-xs font-mono font-bold text-af-yellow uppercase mb-2">
+                  الاسم بالكامل (ثنائي أو ثلاثي):
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={inputName}
+                    onChange={(e) => {
+                      setInputName(e.target.value);
+                      if (nameError) setNameError("");
+                    }}
+                    placeholder="مثال: محمد أحمد"
+                    className={`w-full bg-[#060709] border rounded-2xl px-4 py-3.5 pr-11 text-white text-base text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
+                      nameError
+                        ? "border-red-500/80 ring-1 ring-red-500"
+                        : "border-white/10 focus:border-af-yellow"
+                    }`}
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-af-gray">
+                    <User className="w-4 h-4 text-af-muted" />
+                  </div>
+                </div>
+                {nameError && (
+                  <p className="text-red-400 text-xs mt-1.5 mr-1 font-semibold">
+                    {nameError}
+                  </p>
+                )}
               </div>
 
               {/* إدخال رقم الهاتف الإلزامي */}

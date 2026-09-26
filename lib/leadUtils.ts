@@ -97,12 +97,33 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
     const leadType = categorizeLead(lead);
     const isCourse = isCourseLead(lead);
 
+    // محاولة استخراج اسم العميل الحقيقي
+    let extractedName = (lead.client_name || "").trim();
+    const isPlaceholder =
+      !extractedName ||
+      extractedName.includes("تسجيل") ||
+      extractedName.includes("زائر") ||
+      extractedName.includes("مهتم") ||
+      extractedName.startsWith("عميل (");
+
+    if (isPlaceholder && lead.client_notes) {
+      const match = lead.client_notes.match(/الاسم:\s*([^\]\-]+)/);
+      if (match && match[1]?.trim()) {
+        extractedName = match[1].trim();
+      }
+    }
+
+    const hasRealName =
+      extractedName &&
+      !extractedName.includes("تسجيل") &&
+      !extractedName.includes("زائر") &&
+      !extractedName.includes("مهتم") &&
+      !extractedName.startsWith("عميل (");
+
     if (!clientMap.has(rawPhone)) {
       clientMap.set(rawPhone, {
         phone: rawPhone,
-        name: lead.client_name && !lead.client_name.includes("تسجيل") && !lead.client_name.includes("زائر")
-          ? lead.client_name
-          : "عميل مسجل",
+        name: hasRealName ? extractedName : "عميل مسجل",
         brandName: lead.brand_name || undefined,
         businessField: lead.business_field || undefined,
         country: lead.country || (rawPhone.startsWith("01") ? "مصر" : "الخليج العربي"),
@@ -129,13 +150,8 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
       profile.lastSeen = lead.created_at;
     }
 
-    if (
-      lead.client_name &&
-      !lead.client_name.includes("تسجيل") &&
-      !lead.client_name.includes("زائر") &&
-      profile.name === "عميل مسجل"
-    ) {
-      profile.name = lead.client_name;
+    if (hasRealName && (profile.name === "عميل مسجل" || profile.name.startsWith("عميل ("))) {
+      profile.name = extractedName;
     }
     if (lead.brand_name && !profile.brandName) {
       profile.brandName = lead.brand_name;

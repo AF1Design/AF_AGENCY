@@ -37,7 +37,7 @@ interface OrderModalProps {
 }
 
 export default function OrderModal({ isOpen, onClose, orderData }: OrderModalProps) {
-  const { country, currency, phone: regionPhone } = useRegion();
+  const { country, currency, phone: regionPhone, clientName: regionClientName } = useRegion();
 
   const isCourse = orderData?.serviceCategory === "courses";
 
@@ -57,7 +57,10 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
     if (regionPhone && !phone) {
       setPhone(regionPhone);
     }
-  }, [regionPhone, phone]);
+    if (regionClientName && !clientName) {
+      setClientName(regionClientName);
+    }
+  }, [regionPhone, regionClientName, phone, clientName]);
 
   if (!isOpen || !orderData) return null;
 
