@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ServiceCategory, RegionCurrency } from "@/types";
 import { useRegion } from "@/context/RegionContext";
+import { trackEvent } from "@/lib/fpixel";
 
 interface OrderModalProps {
   isOpen: boolean;
@@ -143,6 +144,25 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
           adSource: isCourse ? "AF Academy - Course Booking" : "AF Agency Portal - Order Modal",
         }),
       });
+      if (isCourse) {
+        trackEvent("Lead", {
+          content_name: orderData?.packageName || "كورس تدريبي",
+          content_category: "academy_courses",
+          lead_type: "course_registration",
+          currency: orderData?.currency || currency,
+          value: orderData?.estimatedPrice
+            ? parseFloat(orderData.estimatedPrice.replace(/[^0-9.]/g, "")) || 0
+            : 0,
+        });
+      } else {
+        trackEvent("Lead", {
+          content_name: orderData?.serviceTitle || "مشروع تجاري",
+          content_category: "studio_projects",
+          lead_type: "business_project",
+          package_name: orderData?.packageName,
+          currency: orderData?.currency || currency,
+        });
+      }
 
       setIsSuccess(true);
     } catch (error) {

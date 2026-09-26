@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
@@ -20,10 +20,25 @@ import ClientAssurance from "@/components/ClientAssurance";
 import { useRegion } from "@/context/RegionContext";
 import { ServiceCategory, RegionCurrency } from "@/types";
 import { MessageCircle, GraduationCap, Briefcase, ArrowLeft } from "lucide-react";
+import { trackEvent, trackCustomEvent } from "@/lib/fpixel";
 
 export default function HomePage() {
   const { phone, country, currency, portalMode, setPortalMode } = useRegion();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (portalMode === "academy") {
+      trackCustomEvent("ViewAcademy", {
+        section: "academy_courses",
+        title: "أكاديمية التدريب والكورسات",
+      });
+    } else {
+      trackCustomEvent("ViewStudio", {
+        section: "studio_projects",
+        title: "الاستوديو الإبداعي والمشاريع",
+      });
+    }
+  }, [portalMode]);
   const [currentOrder, setCurrentOrder] = useState<{
     serviceCategory: ServiceCategory;
     serviceTitle: string;
@@ -61,6 +76,13 @@ export default function HomePage() {
     setCurrentOrder(config);
     setIsModalOpen(true);
 
+    trackEvent("InitiateCheckout", {
+      content_name: config.serviceTitle,
+      content_category: "studio_projects",
+      package_name: config.packageName,
+      currency: currency,
+    });
+
     // تسجيل نقرة العميل على الباقة كاهتمام في حال لم يؤكد الطلب
     if (phone && phone !== "011111111112") {
       fetch("/api/leads", {
@@ -93,6 +115,13 @@ export default function HomePage() {
     };
     setCurrentOrder(courseConfig);
     setIsModalOpen(true);
+
+    trackEvent("InitiateCheckout", {
+      content_name: courseTitle,
+      content_category: "academy_courses",
+      currency: currency,
+      value: priceDisplay ? parseFloat(priceDisplay.replace(/[^0-9.]/g, "")) || 0 : 0,
+    });
 
     // تسجيل اهتمام الكورس
     if (phone && phone !== "011111111112") {
