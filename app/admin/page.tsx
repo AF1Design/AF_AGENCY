@@ -191,6 +191,44 @@ export default function AdminPage() {
     };
   }, [clientsList]);
 
+  // أحدث عميل مسجل لحظياً وقائمة أحدث المسجلين
+  const latestClient = useMemo(() => clientsList[0] || null, [clientsList]);
+  const recentClients = useMemo(() => clientsList.slice(0, 5), [clientsList]);
+
+  // دالة تحويل التاريخ إلى صيغة زمنية نسبية ومريحة
+  const formatRelativeTime = (dateString: string) => {
+    if (!dateString) return "";
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+    if (diffInMinutes < 1) return "الآن (منذ ثوانٍ)";
+    if (diffInMinutes === 1) return "منذ دقيقة واحدة";
+    if (diffInMinutes === 2) return "منذ دقيقتين";
+    if (diffInMinutes < 60) return `منذ ${diffInMinutes} دقيقة`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours === 1) return "منذ ساعة";
+    if (diffInHours === 2) return "منذ ساعتين";
+    if (diffInHours < 24) return `منذ ${diffInHours} ساعة`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return "منذ يوم";
+    if (diffInDays === 2) return "منذ يومين";
+    return date.toLocaleDateString("ar-EG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
+  // دالة الانتقال المباشر إلى سلة عميل معين
+  const handleViewClientCart = (clientPhone: string) => {
+    setActiveTab("intent");
+    setSearchQuery(clientPhone);
+    setStatusFilter("all");
+    setTimeout(() => {
+      const el = document.getElementById("intent-search-bar");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 50);
+  };
+
   // إحصائيات النقرات والاهتمامات (سلة متروكة)
   const intentStats = useMemo(() => {
     return {
@@ -558,7 +596,207 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+        {/* ========================================================= */}
+        {/* قسم المتابعة اللحظية: أحدث العملاء المسجلين وسلة اهتماماتهم */}
+        {/* ========================================================= */}
+        <section className="bg-[#0A0D14] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+          {/* خلفية ضوئية جمالية */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-af-yellow/5 rounded-full blur-3xl pointer-events-none" />
+
+          {/* رأس القسم: العنوان والإحصائية العامة */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/10 relative z-10">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-af-yellow/10 border border-af-yellow/30 text-af-yellow text-xs font-mono font-bold mb-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>LIVE ACTIVITY // تتبع العملاء المسجلين لحظياً</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+                <Users className="w-6 h-6 text-af-yellow" />
+                <span>مركز العملاء المسجلين ومتابعة السلة اللحظية</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-300 mt-1">
+                تعرف على آخر عميل قام بتسجيل بياناته ورقمه وتوقيته، وتابع ما يوجد داخل سلته واهتماماته للتواصل معه فوراً.
+              </p>
+            </div>
+
+            {/* عدادات العملاء السريعة */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="bg-[#06080E] border border-white/10 px-4 py-2.5 rounded-2xl text-center min-w-[100px]">
+                <span className="text-[10px] text-gray-400 font-bold block mb-0.5">إجمالي المسجلين</span>
+                <span className="text-xl sm:text-2xl font-black text-white font-mono">{clientsStats.total}</span>
+              </div>
+              <div className="bg-[#06080E] border border-cyan-500/20 px-3.5 py-2.5 rounded-2xl text-center">
+                <span className="text-[10px] text-cyan-400 font-bold block mb-0.5">طلاب الأكاديمية</span>
+                <span className="text-lg sm:text-xl font-black text-cyan-300 font-mono">{clientsStats.academyStudents}</span>
+              </div>
+              <div className="bg-[#06080E] border border-emerald-500/20 px-3.5 py-2.5 rounded-2xl text-center">
+                <span className="text-[10px] text-emerald-400 font-bold block mb-0.5">عملاء المشاريع</span>
+                <span className="text-lg sm:text-xl font-black text-emerald-300 font-mono">{clientsStats.b2bClients}</span>
+              </div>
+              <div className="bg-[#06080E] border border-af-yellow/20 px-3.5 py-2.5 rounded-2xl text-center">
+                <span className="text-[10px] text-af-yellow font-bold block mb-0.5">عملاء السلة (مهتمين)</span>
+                <span className="text-lg sm:text-xl font-black text-af-yellow font-mono">{clientsStats.potential}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* محتوى القسم: بطاقة أحدث عميل مسجل */}
+          {latestClient ? (
+            <div className="mt-5 space-y-4 relative z-10">
+              <div className="bg-[#0D111A] border-2 border-af-yellow/50 rounded-2xl p-4 sm:p-6 shadow-yellow-glow-sm relative">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                  {/* بيانات العميل الأخير */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-af-yellow text-black flex items-center gap-1.5 shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                        <span>آخر عميل مسجل الآن</span>
+                      </span>
+                      <span className="text-xs font-bold font-mono text-af-yellow bg-af-yellow/10 px-2.5 py-1 rounded-lg border border-af-yellow/20">
+                        {formatRelativeTime(latestClient.lastSeen)}
+                      </span>
+                      <span className="text-xs text-gray-300 font-mono">
+                        ({new Date(latestClient.lastSeen).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} - {new Date(latestClient.lastSeen).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" })})
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3.5 pt-1">
+                      <div className="w-14 h-14 rounded-2xl bg-af-yellow/15 border-2 border-af-yellow/40 flex items-center justify-center text-af-yellow font-black text-2xl shrink-0 shadow-sm">
+                        {latestClient.name ? latestClient.name.slice(0, 1) : "ع"}
+                      </div>
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                          <span>{latestClient.name}</span>
+                          <span className="text-xs font-bold text-gray-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                            {latestClient.country}
+                          </span>
+                        </h3>
+                        <div className="flex items-center gap-2.5 mt-1">
+                          <span className="text-base sm:text-lg font-mono font-black text-af-yellow direction-ltr inline-block">
+                            {latestClient.phone}
+                          </span>
+                          {/* أزرار الاتصال والواتساب السريعة */}
+                          <a
+                            href={`https://wa.me/${latestClient.phone.replace(/[^0-9]/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                            title="مراسلة فورية عبر واتساب"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>واتساب فوري</span>
+                          </a>
+                          <a
+                            href={`tel:${latestClient.phone}`}
+                            className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-bold flex items-center gap-1 transition-all"
+                            title="اتصال هاتفي"
+                          >
+                            <Phone className="w-3.5 h-3.5 text-af-yellow" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ما يوجد داخل سلة هذا العميل / اهتماماته */}
+                    <div className="pt-2 flex items-center gap-2 text-xs sm:text-sm text-gray-200 flex-wrap">
+                      <span className="text-af-yellow font-bold flex items-center gap-1.5 bg-af-yellow/10 px-2.5 py-1 rounded-xl border border-af-yellow/20">
+                        <ShoppingBag className="w-4 h-4 text-af-yellow" />
+                        <span>محتوى سلة العميل واهتماماته:</span>
+                      </span>
+                      {latestClient.intents.length > 0 ? (
+                        <span className="bg-af-yellow/20 text-af-yellow font-bold px-3 py-1 rounded-xl border border-af-yellow/40">
+                          {latestClient.intents[0].selected_package}
+                          {latestClient.totalIntents > 1 && ` (إجمالي ${latestClient.totalIntents} عناصر بالسلة)`}
+                        </span>
+                      ) : latestClient.orders.length > 0 ? (
+                        <span className="bg-emerald-500/20 text-emerald-300 font-bold px-3 py-1 rounded-xl border border-emerald-500/40">
+                          أكد طلب: {latestClient.orders[0].selected_package}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 bg-white/5 px-2.5 py-1 rounded-xl">سجل بياناته ولم يتصفح باقات بعد</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* الزر الإجرائي الرئيسي لفتح السلة */}
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+                    <button
+                      onClick={() => handleViewClientCart(latestClient.phone)}
+                      className="px-6 py-3.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-yellow-glow transition-all active:scale-95 cursor-pointer"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>افتح سلة واهتمامات هذا العميل</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab("clients");
+                        setSearchQuery(latestClient.phone);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <UserCheck className="w-3.5 h-3.5 text-af-yellow" />
+                      <span>عرض ملفه الكامل وسجل نشاطه</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* جدول / قائمة سريعة بآخر المسجلين */}
+              {recentClients.length > 1 && (
+                <div className="pt-2">
+                  <div className="flex items-center justify-between mb-2.5 px-1">
+                    <span className="text-xs sm:text-sm font-bold text-gray-200 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-af-yellow" />
+                      <span>أحدث العملاء المسجلين مؤخراً بالترتيب الزمني:</span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        setActiveTab("clients");
+                        setSearchQuery("");
+                      }}
+                      className="text-xs text-af-yellow hover:underline font-bold cursor-pointer"
+                    >
+                      عرض قاعدة المسجلين بالكامل ({clientsStats.total})
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {recentClients.slice(1, 5).map((cl) => (
+                      <div
+                        key={cl.phone}
+                        className="p-3.5 rounded-2xl bg-[#06080E] border border-white/10 hover:border-af-yellow/40 transition-all flex flex-col justify-between gap-2.5"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-xs sm:text-sm font-bold text-white truncate">{cl.name}</span>
+                            <span className="text-[10px] text-gray-400 font-mono bg-white/5 px-2 py-0.5 rounded">{formatRelativeTime(cl.lastSeen)}</span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-af-yellow direction-ltr block truncate">{cl.phone}</span>
+                          <span className="text-[11px] text-gray-300 line-clamp-1 mt-1 font-medium">
+                            {cl.intents[0]?.selected_package || cl.orders[0]?.selected_package || "زائر مسجل"}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleViewClientCart(cl.phone)}
+                          className="w-full py-2 px-2.5 rounded-xl bg-white/5 hover:bg-af-yellow hover:text-black border border-white/10 text-xs font-bold text-gray-200 transition-all flex items-center justify-center gap-1.5 mt-1 cursor-pointer"
+                        >
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <span>عرض سلته</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mt-4 p-6 rounded-2xl bg-[#06080E] border border-white/10 text-center text-xs sm:text-sm text-gray-400">
+              لا يوجد عملاء مسجلون حتى الآن. بمجرد تسجيل أي عميل أو زيارته للمنصة، ستظهر بياناته وسلته هنا لحظياً.
+            </div>
+          )}
+        </section>
+
         {/* ========================================================= */}
         {/* التبويب الأول: قسم إدارة مشاريع الشركات (B2B)               */}
         {/* ========================================================= */}
@@ -1527,8 +1765,29 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* شريط تنبيه التصفية الخاصة بسلة عميل محدد */}
+            {searchQuery && (
+              <div className="bg-af-yellow/10 border border-af-yellow/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-yellow-glow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-af-yellow/20 flex items-center justify-center text-af-yellow shrink-0">
+                    <ShoppingBag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-af-yellow font-bold block">أنت تستعرض الآن سلة واهتمامات العميل:</span>
+                    <span className="text-sm sm:text-base font-black text-white font-mono direction-ltr inline-block">{searchQuery}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-gray-200 hover:text-white transition-all self-start sm:self-auto cursor-pointer"
+                >
+                  إلغاء التصفية وعرض سلات كل العملاء
+                </button>
+              </div>
+            )}
+
             {/* شريط البحث والفلترة للمهتمين */}
-            <div className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+            <div id="intent-search-bar" className="bg-[#0A0D14] border border-white/10 p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-af-yellow absolute right-3.5 top-1/2 -translate-y-1/2" />
                 <input
