@@ -189,3 +189,47 @@ export function groupLeadsByClient(leads: SimpleLead[]): ClientProfile[] {
     (a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime()
   );
 }
+
+// دالة تحويل وضبط رقم الهاتف للصيغة الدولية الصحيحة للواتساب لفتحه فوراً دون أخطاء
+export function formatWhatsAppUrl(rawPhone: string, message: string = ""): string {
+  if (!rawPhone) return "#";
+
+  let cleaned = rawPhone.replace(/[^0-9]/g, "");
+  if (!cleaned) return "#";
+
+  // إزالة أي أصفار بادئة دولية مثل 0020 أو 00966
+  if (cleaned.startsWith("00")) {
+    cleaned = cleaned.substring(2);
+  }
+
+  // الأرقام المصرية: تبدأ بـ 01 (مثل 010, 011, 012, 015)
+  if (cleaned.startsWith("01")) {
+    cleaned = "20" + cleaned.substring(1);
+  }
+  // إذا أدخل المستخدم كود مصر مع الصفر المحلي مثل 2001
+  else if (cleaned.startsWith("2001")) {
+    cleaned = "20" + cleaned.substring(3);
+  }
+  // إذا كان الرقم مصرياً بدون 0 وبدون كود (10 أرقام تبدأ بـ 10, 11, 12, 15)
+  else if (
+    (cleaned.startsWith("10") ||
+      cleaned.startsWith("11") ||
+      cleaned.startsWith("12") ||
+      cleaned.startsWith("15")) &&
+    cleaned.length === 10
+  ) {
+    cleaned = "20" + cleaned;
+  }
+  // الأرقام السعودية والخليجية تبدأ بـ 05
+  else if (cleaned.startsWith("05")) {
+    cleaned = "966" + cleaned.substring(1);
+  }
+  // إذا كان الرقم سعودياً يبدأ بـ 5 وتتراوح أرقامه
+  else if (cleaned.startsWith("5") && cleaned.length === 9) {
+    cleaned = "966" + cleaned;
+  }
+
+  const encodedText = message ? `&text=${encodeURIComponent(message)}` : "";
+  return `https://api.whatsapp.com/send?phone=${cleaned}${encodedText}`;
+}
+

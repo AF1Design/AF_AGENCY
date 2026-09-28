@@ -36,6 +36,7 @@ import {
   SimpleLead,
   isCourseLead,
   isB2BLead,
+  formatWhatsAppUrl,
 } from "@/lib/leadUtils";
 
 export default function AdminPage() {
@@ -592,7 +593,10 @@ export default function AdminPage() {
                           {/* أزرار الاتصال والتفاصيل */}
                           <div className="flex items-center gap-2 shrink-0">
                             <a
-                              href={`https://wa.me/${client.phone.replace(/[^0-9]/g, "")}?text=${waMsg}`}
+                              href={formatWhatsAppUrl(
+                                client.phone,
+                                `مرحباً بك أستاذ ${client.name}، يسعدنا التواصل معك من إدارة منصة AF AGENCY بخصوص اهتماماتك ومشاريعك.`
+                              )}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all"
@@ -729,7 +733,10 @@ export default function AdminPage() {
                           {/* إجراءات الطلب السريعة */}
                           <div className="flex items-center gap-2 shrink-0 flex-wrap">
                             <a
-                              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=${waMsg}`}
+                              href={formatWhatsAppUrl(
+                                lead.phone,
+                                `مرحباً بك أستاذ ${lead.client_name}، نتواصل معك من إدارة AF AGENCY بخصوص طلب مشروع [${lead.selected_package}]. يسعدنا تحديد المتطلبات والبدء.`
+                              )}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all"
@@ -857,7 +864,10 @@ export default function AdminPage() {
 
                           <div className="flex items-center gap-2 shrink-0 flex-wrap">
                             <a
-                              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=${waMsg}`}
+                              href={formatWhatsAppUrl(
+                                lead.phone,
+                                `أهلاً بك أستاذ ${lead.client_name}، نتواصل معك من إدارة AF ACADEMY بخصوص حجزك في كورس [${lead.selected_package}]. يسعدنا إتمام تسجيل مقعدك.`
+                              )}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all"
@@ -962,7 +972,10 @@ export default function AdminPage() {
 
                           <div className="flex items-center gap-2 shrink-0">
                             <a
-                              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=${waMsg}`}
+                              href={formatWhatsAppUrl(
+                                lead.phone,
+                                `أهلاً بك أستاذ ${lead.client_name}، لاحظنا تصفحك لباقة [${lead.selected_package}] على منصة AF AGENCY. يسعدنا تقديم استشارة ومساعدتك في اختيار الأنسب لك!`
+                              )}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black flex items-center gap-1.5 transition-all"
