@@ -128,26 +128,26 @@ export default function WelcomeGateModal() {
           <div className="ambient-orb w-[300px] h-[300px] bg-af-yellow/10 top-0 left-1/2 -translate-x-1/2 pointer-events-none" />
 
           <div className="relative z-10 text-center">
-            {/* بادج الترحيب الأمني */}
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-af-yellow bg-af-yellow/10 px-3.5 py-1.5 rounded-full border border-af-yellow/30 mb-4 shadow-yellow-glow-sm">
+            {/* بادج الترحيب الأنيق */}
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-af-yellow bg-af-yellow/10 px-4 py-1.5 rounded-full border border-af-yellow/30 mb-4 shadow-yellow-glow-sm">
               <Server className="w-3.5 h-3.5" />
-              <span>AF AGENCY // تهيئة الخوادم السحابية للمشروع</span>
+              <span>تحديد الدولة والعملة // استعراض الباقات والعروض المتاحة</span>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2.5 leading-snug">
-              حدد دولتك لربط سيرفرات موقعك
-              <span className="block text-af-yellow text-lg sm:text-2xl mt-1">واستعراض باقات المشروع المخصصة</span>
+            <h2 className="text-xl sm:text-2xl font-black text-white mb-2.5 leading-snug">
+              اختر دولتك لعرض الأسعار والعملة المناسبة
+              <span className="block text-af-yellow text-lg sm:text-2xl mt-1">واستعراض تفاصيل الباقات والعروض المخصصة</span>
             </h2>
 
             <p className="text-gray-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-md mx-auto">
-              يجب تحديد دولة نشاطك الفعلي لربط موقعك بالسيرفرات السحابية وبوابات الدفع الخاصة ببلدك، لضمان أقصى سرعة تشغيل واستقرار لمشروعك وتفادي أي تعارض تقني.
+              يرجى تحديد دولتك وضبط العملة وتأكيد بيانات التواصل لتجهيز العرض المناسب لك، وتسهيل متابعة طلبك واستفساراتك مباشرة.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5 text-right">
-              {/* اختيار نطاق السيرفرات والخدمة */}
+              {/* اختيار نطاق الدولة والعملة */}
               <div>
-                <label className="block text-xs font-mono font-bold text-af-yellow uppercase mb-2">
-                  دولة النشاط وسيرفرات الموقع:
+                <label className="block text-xs font-bold text-af-yellow uppercase mb-2">
+                  دولة النشاط والعملة:
                 </label>
                 <div className="grid grid-cols-1 gap-2.5">
                   {/* نطاق مصر */}
@@ -167,12 +167,12 @@ export default function WelcomeGateModal() {
                       <div className="font-bold text-sm text-white flex items-center gap-2 mb-1">
                         <span>🇪🇬</span>
                         <span>جمهورية مصر العربية</span>
-                        <span className="text-[10px] font-mono text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
-                          خوادم مصر
+                        <span className="text-[11px] font-bold text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
+                          الجنيه المصري (EGP)
                         </span>
                       </div>
                       <p className="text-[11px] text-gray-300 leading-relaxed">
-                        ربط سيرفرات القاهرة السحابية وتفعيل بوابات الدفع الإلكتروني المعتمدة داخل السوق المصري.
+                        عرض الأسعار بالجنيه المصري وتفعيل طرق الدفع والتحويل البنكي والمحلي داخل مصر.
                       </p>
                     </div>
                     {selectedCountry === "EG" && (
@@ -197,12 +197,12 @@ export default function WelcomeGateModal() {
                       <div className="font-bold text-sm text-white flex items-center gap-2 mb-1">
                         <span>🇸🇦</span>
                         <span>المملكة العربية السعودية ودول الخليج</span>
-                        <span className="text-[10px] font-mono text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
-                          خوادم الخليج
+                        <span className="text-[11px] font-bold text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
+                          الريال السعودي (SAR)
                         </span>
                       </div>
                       <p className="text-[11px] text-gray-300 leading-relaxed">
-                        ربط سيرفرات الخليج السحابية وتفعيل بوابات الدفع الإلكتروني المعتمدة في دول الخليج.
+                        عرض الأسعار بالريال السعودي وتفعيل بوابات الدفع الإلكتروني المعتمدة بدول الخليج.
                       </p>
                     </div>
                     {selectedCountry === "GULF" && (
@@ -214,7 +214,7 @@ export default function WelcomeGateModal() {
 
               {/* إدخال الاسم بالكامل الإلزامي */}
               <div>
-                <label className="block text-xs font-mono font-bold text-af-yellow uppercase mb-2">
+                <label className="block text-xs font-bold text-af-yellow mb-2">
                   الاسم بالكامل (ثنائي أو ثلاثي):
                 </label>
                 <div className="relative">
@@ -232,8 +232,8 @@ export default function WelcomeGateModal() {
                         : "border-white/10 focus:border-af-yellow"
                     }`}
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-af-gray">
-                    <User className="w-4 h-4 text-af-muted" />
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
+                    <User className="w-4 h-4 text-af-yellow" />
                   </div>
                 </div>
                 {nameError && (
@@ -245,11 +245,11 @@ export default function WelcomeGateModal() {
 
               {/* إدخال رقم الهاتف الإلزامي */}
               <div>
-                <label className="block text-xs font-mono font-bold text-af-yellow uppercase mb-2">
+                <label className="block text-xs font-bold text-af-yellow mb-2">
                   رقم الهاتف أو الواتساب للتواصل والتحقق:
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-af-muted text-xs font-mono font-bold">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 text-xs font-bold">
                     {selectedCountry === "EG" ? "+20" : "+966"}
                   </div>
                   <input

@@ -115,3 +115,32 @@ export function deleteLead(id: string): boolean {
     return false;
   }
 }
+
+export function clearAllIntents(): boolean {
+  try {
+    ensureStoreExists();
+    let leads = getAllLeads();
+    // نحتفظ بطلبات المشاريع والكورسات المؤكدة ونحذف سجلات التصفح والسلات المتروكة
+    leads = leads.filter((l) => l.lead_type === "order");
+    fs.writeFileSync(STORE_PATH, JSON.stringify(leads, null, 2), "utf8");
+    return true;
+  } catch (error) {
+    console.error("Error clearing intents:", error);
+    return false;
+  }
+}
+
+export function deleteLeadsByPhone(phone: string): boolean {
+  try {
+    ensureStoreExists();
+    let leads = getAllLeads();
+    const clean = phone.replace(/[^0-9]/g, "");
+    leads = leads.filter((l) => l.phone.replace(/[^0-9]/g, "") !== clean);
+    fs.writeFileSync(STORE_PATH, JSON.stringify(leads, null, 2), "utf8");
+    return true;
+  } catch (error) {
+    console.error("Error deleting leads by phone:", error);
+    return false;
+  }
+}
+

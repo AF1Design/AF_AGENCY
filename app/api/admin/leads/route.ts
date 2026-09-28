@@ -98,15 +98,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const updated = updateLeadStatus(id, status as LeadItem["status"]);
-    if (!updated) {
-      return NextResponse.json(
-        { error: "الطلب غير موجود أو تعذر تحديثه" },
-        { status: 404 }
-      );
-    }
-
-    // مزامنة التحديث مع سوبابيس أيضاً
+    // تحديث في سوبابيس أولاً
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from("leads").update({ status }).eq("id", id);
@@ -114,6 +106,9 @@ export async function PATCH(request: Request) {
         console.warn("Supabase update warning:", err);
       }
     }
+
+    // تحديث في التخزين المحلي
+    updateLeadStatus(id, status as LeadItem["status"]);
 
     return NextResponse.json({
       success: true,
@@ -139,7 +134,44 @@ export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
+    const clearIntents = url.searchParams.get("clear_intents") === "true";
+    const clientPhone = url.searchParams.get("client_phone");
 
+    // 1. خيار تنظيف سلات التصفح وسجلات النقرات بنقرة واحدة
+    if (clearIntents) {
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.from("leads").delete().neq("lead_type", "order");
+        } catch (err) {
+          console.warn("Supabase clear intents warning:", err);
+        }
+      }
+      const { clearAllIntents } = await import("@/lib/leadsStore");
+      clearAllIntents();
+      return NextResponse.json({
+        success: true,
+        message: "تم تنظيف كافة سلات التصفح والاهتمامات بنجاح",
+      });
+    }
+
+    // 2. خيار مسح كافة سجلات عميل معين
+    if (clientPhone) {
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.from("leads").delete().eq("phone", clientPhone);
+        } catch (err) {
+          console.warn("Supabase delete by phone warning:", err);
+        }
+      }
+      const { deleteLeadsByPhone } = await import("@/lib/leadsStore");
+      deleteLeadsByPhone(clientPhone);
+      return NextResponse.json({
+        success: true,
+        message: "تم مسح كافة سجلات العميل بنجاح",
+      });
+    }
+
+    // 3. حذف سجل فردي
     if (!id) {
       return NextResponse.json(
         { error: "معرف الطلب مطلوب للحذف" },
@@ -147,15 +179,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const deleted = deleteLead(id);
-    if (!deleted) {
-      return NextResponse.json(
-        { error: "تعذر العثور على الطلب لحذفه" },
-        { status: 404 }
-      );
-    }
-
-    // مزامنة الحذف مع سوبابيس أيضاً
+    // حذف مباشر من سوبابيس
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from("leads").delete().eq("id", id);
@@ -163,6 +187,9 @@ export async function DELETE(request: Request) {
         console.warn("Supabase delete warning:", err);
       }
     }
+
+    // حذف من التخزين المحلي
+    deleteLead(id);
 
     return NextResponse.json({
       success: true,
