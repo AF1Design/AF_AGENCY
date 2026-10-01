@@ -316,25 +316,21 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden lg:hidden bg-[#0B0D12]/98 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4"
           >
-          {/* رابط الإدارة في الموبايل - متاح دائماً للوصول للوحة التحكم */}
-          <a
-            href="/admin"
-            className="w-full py-2.5 px-4 rounded-xl bg-af-yellow/15 border border-af-yellow/40 text-af-yellow font-bold text-xs flex items-center justify-between hover:bg-af-yellow/25 transition-all shadow-sm"
-          >
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-af-yellow" />
-              <span>لوحة تحكم الإدارة</span>
-            </div>
-            {isAdmin ? (
-              <span className="text-[10px] font-mono bg-af-yellow text-black px-2 py-0.5 rounded-full font-black">
-                مسؤول متصل
+          {/* رابط لوحة تحكم الإدارة - يظهر حصرياً وفقط لحساب الأدمن بالرقم المعتمد */}
+          {isAdmin && (
+            <a
+              href="/admin"
+              className="w-full py-2.5 px-4 rounded-xl bg-af-yellow text-black font-bold text-xs flex items-center justify-between shadow-yellow-glow"
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span>لوحة تحكم إدارة الطلبات</span>
+              </div>
+              <span className="text-[10px] font-mono bg-black text-af-yellow px-2 py-0.5 rounded-full font-bold">
+                ADMIN
               </span>
-            ) : (
-              <span className="text-[10px] font-mono bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">
-                تسجيل الدخول
-              </span>
-            )}
-          </a>
+            </a>
+          )}
 
           {/* زر تسجيل الخروج في الموبايل */}
           {phone ? (
