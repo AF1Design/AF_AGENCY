@@ -88,12 +88,12 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
           : "bg-transparent py-3 sm:py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-3">
           {/* الشعار ومفتاح التبديل للكمبيوتر */}
-          <div className="flex items-center gap-4 sm:gap-6">
-            <a href="#" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-28 sm:w-44 h-9 sm:h-12 transition-transform duration-300 group-hover:scale-105">
+          <div className="flex items-center gap-2 sm:gap-6 shrink-0">
+            <a href="#" className="flex items-center gap-2 group shrink-0">
+              <div className="relative w-24 sm:w-44 h-8 sm:h-12 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   key={portalMode}
                   src={isAcademy ? "/images/logo-academy.png" : "/images/logo-transparent.png"}
@@ -213,25 +213,25 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
               </a>
             </div>
 
-            {/* مفتاح التبديل الذكي الصغير بجانب الواتساب مباشرة */}
+            {/* مفتاح التبديل الذكي الصغير جداً على الموبايل ليترك مساحة كاملة لبقية العناصر */}
             <button
               type="button"
               onClick={togglePortalMode}
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-[#0E1118]/90 hover:bg-[#141824] border border-af-yellow/40 hover:border-af-yellow text-white text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-yellow-glow-sm group shrink-0"
+              className="inline-flex items-center gap-1 px-2 py-1.5 rounded-xl bg-[#0E1118]/90 hover:bg-[#141824] border border-af-yellow/40 hover:border-af-yellow text-white text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-yellow-glow-sm group shrink-0"
               title={isAcademy ? "الانتقال إلى خدمات المشاريع" : "الانتقال إلى كورسات الأكاديمية"}
               aria-label="تبديل وضع المنصة"
             >
               {isAcademy ? (
                 <>
                   <GraduationCap className="w-3.5 h-3.5 text-af-yellow shrink-0" />
-                  <span className="font-extrabold text-af-yellow">الأكاديمية</span>
-                  <ArrowLeftRight className="w-3 h-3 text-af-yellow group-hover:rotate-180 transition-transform duration-300 shrink-0" />
+                  <span className="font-extrabold text-af-yellow text-[11px] hidden sm:inline">الأكاديمية</span>
+                  <ArrowLeftRight className="w-2.5 h-2.5 text-af-yellow group-hover:rotate-180 transition-transform duration-300 shrink-0" />
                 </>
               ) : (
                 <>
                   <Briefcase className="w-3.5 h-3.5 text-white shrink-0" />
-                  <span className="font-extrabold text-white">المشاريع</span>
-                  <ArrowLeftRight className="w-3 h-3 text-gray-400 group-hover:rotate-180 transition-transform duration-300 shrink-0" />
+                  <span className="font-extrabold text-white text-[11px] hidden sm:inline">المشاريع</span>
+                  <ArrowLeftRight className="w-2.5 h-2.5 text-gray-400 group-hover:rotate-180 transition-transform duration-300 shrink-0" />
                 </>
               )}
             </button>
@@ -241,62 +241,65 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
               href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMsg)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all shadow-sm shrink-0"
+              className="inline-flex items-center justify-center p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all shadow-sm shrink-0"
               title="Direct WhatsApp"
             >
               <MessageCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </a>
 
-            {/* زر لوحة تحكم الإدارة (يظهر فقط وحصرياً لحساب الأدمن) */}
+            {/* زر لوحة تحكم الإدارة (يظهر لحساب الأدمن) */}
             {isAdmin && (
               <a
                 href="/admin"
-                className="px-3 py-2 rounded-xl bg-af-yellow text-black font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow hover:bg-af-yellow-hover transition-all active:scale-95"
+                className="p-2 sm:px-3 sm:py-2 rounded-xl bg-af-yellow text-black font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow hover:bg-af-yellow-hover transition-all active:scale-95 shrink-0"
                 title="لوحة تحكم الإدارة"
               >
-                <Shield className="w-3.5 h-3.5" />
+                <Shield className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden sm:inline">لوحة التحكم</span>
               </a>
             )}
 
-            {/* زر الإجراء الرئيسي للكمبيوتر والشاشات الأكبر */}
-            {!isAcademy ? (
-              <button
-                onClick={onOpenConfigurator}
-                className="hidden sm:inline-flex relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95 shrink-0"
-              >
-                <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span>START A PROJECT</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => scrollToSection("courses")}
-                className="hidden sm:inline-flex relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95 shrink-0"
-              >
-                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
-                <span>EXPLORE TRACKS</span>
-              </button>
-            )}
-
-            {/* زر تسجيل الخروج وتبديل الحساب للكمبيوتر */}
+            {/* زر تسجيل الخروج وتبديل الحساب - يظهر دائماً عند تسجيل الدخول */}
             {phone && (
               <button
                 onClick={logout}
-                className="hidden sm:flex p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-300 hover:text-red-400 text-xs font-mono items-center gap-1 transition-colors"
+                className="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-300 hover:text-red-400 text-xs font-mono flex items-center gap-1 transition-colors shrink-0"
                 title="تسجيل خروج أو تبديل الحساب"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden xl:inline text-[11px]">خروج</span>
               </button>
             )}
 
-            {/* زر القائمة للموبايل */}
+            {/* زر الإجراء الرئيسي */}
+            {!isAcademy ? (
+              <button
+                onClick={onOpenConfigurator}
+                className="relative group overflow-hidden px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1 shadow-yellow-glow transition-all active:scale-95 shrink-0"
+              >
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                <span className="hidden sm:inline">START A PROJECT</span>
+                <span className="sm:hidden text-[10px]">مشروع</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => scrollToSection("courses")}
+                className="relative group overflow-hidden px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1 shadow-yellow-glow transition-all active:scale-95 shrink-0"
+              >
+                <GraduationCap className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                <span className="hidden sm:inline">EXPLORE TRACKS</span>
+                <span className="sm:hidden text-[10px]">الكورسات</span>
+              </button>
+            )}
+
+            {/* زر القائمة للموبايل - محمي من الانكماش وظاهر دائماً بوضوح */}
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-af-card border border-white/10 text-af-light hover:text-af-yellow shrink-0 focus:outline-none"
+              className="lg:hidden p-2 rounded-xl bg-af-card border border-white/20 text-white hover:text-af-yellow hover:border-af-yellow/50 transition-all shrink-0 focus:outline-none focus:ring-1 focus:ring-af-yellow shadow-md"
               aria-label="القائمة"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-af-yellow" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -305,24 +308,28 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
       {/* قائمة الموبايل المنبثقة الغنية بحسابات التواصل */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#0B0D12]/98 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
-          {/* رابط الإدارة في الموبايل */}
-          {isAdmin && (
-            <a
-              href="/admin"
-              className="w-full py-2.5 px-4 rounded-xl bg-af-yellow text-black font-bold text-xs flex items-center justify-between shadow-yellow-glow"
-            >
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                <span>لوحة تحكم إدارة الطلبات</span>
-              </div>
-              <span className="text-[10px] font-mono bg-black text-af-yellow px-2 py-0.5 rounded-full font-bold">
-                ADMIN
+          {/* رابط الإدارة في الموبايل - متاح دائماً للوصول للوحة التحكم */}
+          <a
+            href="/admin"
+            className="w-full py-2.5 px-4 rounded-xl bg-af-yellow/15 border border-af-yellow/40 text-af-yellow font-bold text-xs flex items-center justify-between hover:bg-af-yellow/25 transition-all shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-af-yellow" />
+              <span>لوحة تحكم الإدارة</span>
+            </div>
+            {isAdmin ? (
+              <span className="text-[10px] font-mono bg-af-yellow text-black px-2 py-0.5 rounded-full font-black">
+                مسؤول متصل
               </span>
-            </a>
-          )}
+            ) : (
+              <span className="text-[10px] font-mono bg-white/10 text-gray-300 px-2 py-0.5 rounded-full">
+                تسجيل الدخول
+              </span>
+            )}
+          </a>
 
           {/* زر تسجيل الخروج في الموبايل */}
-          {phone && (
+          {phone ? (
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
@@ -335,6 +342,20 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
                 <span>تسجيل خروج / تبديل رقم الهاتف</span>
               </div>
               <span className="text-[10px] font-mono opacity-75">{phone}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenConfigurator();
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-xs flex items-center justify-between transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-af-yellow" />
+                <span>حجز مباشر وتسجيل البيانات</span>
+              </div>
+              <span className="text-[10px] font-mono text-af-yellow">طلب الآن</span>
             </button>
           )}
 
