@@ -109,11 +109,11 @@ export default function WelcomeGateModal() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, x: 80, scale: 0.95 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          exit={{ opacity: 0, x: 80, scale: 0.95 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 sm:max-w-sm w-auto bg-[#0E1118]/95 border border-af-yellow/40 rounded-3xl p-5 shadow-2xl backdrop-blur-2xl text-right"
+          initial={{ opacity: 0, y: 25, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 25, scale: 0.96 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-24 sm:bottom-6 right-4 left-4 sm:left-auto sm:right-6 z-50 sm:max-w-sm w-auto bg-[#0E1118]/95 border border-af-yellow/40 rounded-3xl p-5 shadow-2xl backdrop-blur-2xl text-right"
         >
           {/* هالة خلفية ناعمة */}
           <div className="ambient-orb w-48 h-48 bg-af-yellow/10 top-0 right-0 pointer-events-none" />

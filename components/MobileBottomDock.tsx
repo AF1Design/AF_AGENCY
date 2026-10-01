@@ -43,16 +43,16 @@ export default function MobileBottomDock() {
 
   return (
     <div className="fixed bottom-3 sm:bottom-5 inset-x-0 z-40 pointer-events-none flex justify-center px-3 xl:hidden">
-      <AnimatePresence mode="wait">
+      <AnimatePresence initial={false}>
         {!isCollapsed ? (
           /* الشريط الكامل الموسع بتصميم النوتش الزجاجي من آبل */
           <motion.nav
             key="dock-expanded"
-            initial={{ opacity: 0, y: 35, scale: 0.92 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 35, scale: 0.92 }}
-            transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            className="pointer-events-auto relative flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 rounded-full bg-[#080A10]/90 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)_inset] overflow-hidden"
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="pointer-events-auto relative flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 rounded-full bg-[#080A10]/95 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)_inset] overflow-hidden"
           >
             {/* خط إضاءة زجاجي علوي بنمط آبل */}
             <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
@@ -66,11 +66,7 @@ export default function MobileBottomDock() {
               }`}
             >
               {isHome && (
-                <motion.div
-                  layoutId="activeDockPill"
-                  className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full"
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                />
+                <span className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full pointer-events-none" />
               )}
               <Home className="w-4 h-4 mb-0.5 relative z-10 shrink-0" />
               <span className="relative z-10 tracking-tight">الرئيسية</span>
@@ -86,11 +82,7 @@ export default function MobileBottomDock() {
               }`}
             >
               {isSubscriptions && (
-                <motion.div
-                  layoutId="activeDockPill"
-                  className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full"
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                />
+                <span className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full pointer-events-none" />
               )}
               <div className="relative z-10 flex items-center justify-center">
                 <Tag className="w-4 h-4 mb-0.5 shrink-0" />
@@ -109,11 +101,7 @@ export default function MobileBottomDock() {
               }`}
             >
               {isStudentWorks && (
-                <motion.div
-                  layoutId="activeDockPill"
-                  className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full"
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                />
+                <span className="absolute inset-0 bg-af-yellow/15 border border-af-yellow/30 rounded-full pointer-events-none" />
               )}
               <GraduationCap className="w-4 h-4 mb-0.5 relative z-10 shrink-0" />
               <span className="relative z-10 tracking-tight">أعمال الطلبة</span>
@@ -151,10 +139,10 @@ export default function MobileBottomDock() {
           /* النوتش الصغير المصغر بنمط Dynamic Island */
           <motion.button
             key="dock-collapsed"
-            initial={{ opacity: 0, y: 25, scale: 0.85 }}
+            initial={{ opacity: 0, y: 15, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 25, scale: 0.85 }}
-            transition={{ type: "spring", stiffness: 420, damping: 25 }}
+            exit={{ opacity: 0, y: 15, scale: 0.9 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             onClick={() => setIsCollapsed(false)}
             className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#080A10]/95 backdrop-blur-2xl border border-af-yellow/40 shadow-[0_8px_30px_rgba(0,0,0,0.8),0_0_15px_rgba(255,215,0,0.15)] text-white text-xs font-bold transition-all active:scale-95 hover:border-af-yellow group"
             title="إظهار شريط الأقسام"

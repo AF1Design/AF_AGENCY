@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageCircle,
   Menu,
@@ -306,8 +307,15 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
       </div>
 
       {/* قائمة الموبايل المنبثقة الغنية بحسابات التواصل */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0B0D12]/98 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden lg:hidden bg-[#0B0D12]/98 backdrop-blur-2xl border-b border-white/10 px-6 py-6 space-y-4"
+          >
           {/* رابط الإدارة في الموبايل - متاح دائماً للوصول للوحة التحكم */}
           <a
             href="/admin"
@@ -511,8 +519,9 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
               <span>WhatsApp Direct // 01114687759</span>
             </a>
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

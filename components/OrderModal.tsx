@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   X,
   CheckCircle2,
@@ -197,8 +198,13 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[#0E1118] border border-af-yellow/40 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-2xl">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-2xl bg-[#0E1118] border border-af-yellow/40 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
+      >
         {/* زر الإغلاق */}
         <button
           onClick={onClose}
@@ -430,7 +436,7 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
           </div>
         ) : (
           /* واجهة استلام الطلب ومراجعة وتعديل البيانات */
-          <div className="py-2 text-right space-y-5 animate-in zoom-in-95 duration-200">
+          <div className="py-2 text-right space-y-5">
             {/* الشارة الترحيبية ورسالة التأكيد الأساسية المطلوبة */}
             <div className="text-center space-y-3 pb-2 border-b border-white/10">
               <div className="w-14 h-14 rounded-full bg-af-yellow/15 text-af-yellow border border-af-yellow/30 flex items-center justify-center mx-auto shadow-yellow-glow">
@@ -557,7 +563,7 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
