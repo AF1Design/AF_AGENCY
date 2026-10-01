@@ -3,47 +3,57 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "@/context/RegionContext";
-import { CountryCode } from "@/types";
-import { ArrowLeft, Phone, User, CheckCircle2, Server, ShieldCheck, Loader2 } from "lucide-react";
-
+import { X, Phone, User, CheckCircle2, ShieldCheck, Loader2, Sparkles, Send } from "lucide-react";
 import { validateRealPhone, validateRealName } from "@/lib/leadUtils";
 
 export default function WelcomeGateModal() {
-  const { isGateOpen, setRegion } = useRegion();
-  const [selectedCountry, setSelectedCountry] = useState<CountryCode>("EG");
+  const { isGateOpen, closeGate, setRegion } = useRegion();
+  const [isVisible, setIsVisible] = useState(false);
   const [inputName, setInputName] = useState("");
   const [nameError, setNameError] = useState("");
   const [inputPhone, setInputPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // قفل التمرير بالكامل في الصفحة طالما البوابة مفتوحة لمنع أي تصفح خلفي
+  // إظهار البطاقة الجانبية بعد 10 ثوانٍ من التصفح إذا لم يسجل العميل أو يلغِ البطاقة مسبقاً
   useEffect(() => {
+    // إذا فُتحت البوابة يدوياً (مثلاً من زر تسجيل دخول الأدمن)
     if (isGateOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      setIsVisible(true);
+      return;
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+
+    if (typeof window === "undefined") return;
+
+    const alreadyDismissed = sessionStorage.getItem("af_lead_card_dismissed");
+    const savedPhone = localStorage.getItem("af_phone");
+
+    // إذا سجل العميل رقمه مسبقاً أو ألغى البطاقة في هذه الجلسة، لا تظهر تلقائياً
+    if (alreadyDismissed === "true" || (savedPhone && savedPhone.trim().length >= 8)) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10000); // 10 ثوانٍ
+
+    return () => clearTimeout(timer);
   }, [isGateOpen]);
 
-  if (!isGateOpen) return null;
-
-  const validateName = (nameStr: string) => validateRealName(nameStr);
-  const validatePhone = (phoneStr: string, country: CountryCode) => validateRealPhone(phoneStr, country);
+  const handleDismiss = () => {
+    setIsVisible(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("af_lead_card_dismissed", "true");
+    }
+    closeGate();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (typeof window !== "undefined") {
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-    }
 
-    const nErr = validateName(inputName);
-    const pErr = validatePhone(inputPhone, selectedCountry);
+    const nErr = validateRealName(inputName);
+    const pErr = validateRealPhone(inputPhone, "EG");
 
     if (nErr) setNameError(nErr);
     if (pErr) setPhoneError(pErr);
@@ -60,223 +70,194 @@ export default function WelcomeGateModal() {
     const cleanPhone = inputPhone.trim();
 
     try {
-      // إرسال بيانات العميل فوراً لقاعدة البيانات ولوحة التحكم
       await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName: cleanName,
           phone: cleanPhone,
-          country: selectedCountry === "EG" ? "مصر" : "الخليج العربي",
-          currency: selectedCountry === "EG" ? "EGP" : "SAR",
+          country: "مصر",
+          currency: "EGP",
           serviceCategory: "web",
-          selectedPackage: "بوابة تحديد النطاق والأسعار",
+          selectedPackage: "نموذج التواصل السريع والخصومات",
           selectedAddons: [],
-          clientNotes: `تسجيل عميل جديد من بوابة الدخول: [الاسم: ${cleanName}] - [الهاتف: ${cleanPhone}] - [النطاق: ${selectedCountry === "EG" ? "خوادم مصر" : "خوادم الخليج"}]`,
+          clientNotes: `تسجيل عميل جديد من البطاقة الجانبية السريعة: [الاسم: ${cleanName}] - [الهاتف: ${cleanPhone}]`,
           leadType: "registration",
-          adSource: "بوابة الدخول الرئيسية (Welcome Gate)",
+          adSource: "البطاقة الجانبية للتواصل (Slide Card)",
         }),
       });
     } catch (err) {
-      // Continue so the user is not stuck on network error
+      // الاستمرار في الحفظ المحلي حتى مع ضعف الاتصال
     }
 
-    setRegion(selectedCountry, cleanPhone, cleanName);
+    setRegion("EG", cleanPhone, cleanName);
     setIsSubmitting(false);
+    setIsSuccess(true);
 
     if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      sessionStorage.setItem("af_lead_card_dismissed", "true");
     }
+
+    // إغلاق البطاقة بعد ثانية ونصف من نجاح الحفظ
+    setTimeout(() => {
+      setIsVisible(false);
+      closeGate();
+    }, 1600);
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/95 backdrop-blur-2xl">
+      {isVisible && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 15 }}
+          initial={{ opacity: 0, x: 80, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 80, scale: 0.95 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="relative w-full max-w-lg bg-[#0E1118] border border-af-yellow/50 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
+          className="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 sm:max-w-sm w-auto bg-[#0E1118]/95 border border-af-yellow/40 rounded-3xl p-5 shadow-2xl backdrop-blur-2xl text-right"
         >
           {/* هالة خلفية ناعمة */}
-          <div className="ambient-orb w-[300px] h-[300px] bg-af-yellow/10 top-0 left-1/2 -translate-x-1/2 pointer-events-none" />
+          <div className="ambient-orb w-48 h-48 bg-af-yellow/10 top-0 right-0 pointer-events-none" />
 
-          <div className="relative z-10 text-center">
-            {/* بادج الترحيب الأنيق */}
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-af-yellow bg-af-yellow/10 px-4 py-1.5 rounded-full border border-af-yellow/30 mb-4 shadow-yellow-glow-sm">
-              <Server className="w-3.5 h-3.5" />
-              <span>تحديد الدولة والعملة // استعراض الباقات والعروض المتاحة</span>
+          {/* الرأس: شارة وزر الإلغاء */}
+          <div className="flex items-center justify-between gap-3 mb-3 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-af-yellow/10 border border-af-yellow/30 text-af-yellow text-[11px] font-bold">
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span>تواصل مباشر واستشارة مجانية</span>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-white mb-2.5 leading-snug">
-              اختر دولتك لعرض الأسعار والعملة المناسبة
-              <span className="block text-af-yellow text-lg sm:text-2xl mt-1">واستعراض تفاصيل الباقات والعروض المخصصة</span>
-            </h2>
-
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-md mx-auto">
-              يرجى تحديد دولتك وضبط العملة وتأكيد بيانات التواصل لتجهيز العرض المناسب لك، وتسهيل متابعة طلبك واستفساراتك مباشرة.
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-5 text-right">
-              {/* اختيار نطاق الدولة والعملة */}
-              <div>
-                <label className="block text-xs font-bold text-af-yellow uppercase mb-2">
-                  دولة النشاط والعملة:
-                </label>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {/* نطاق مصر */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCountry("EG");
-                      setPhoneError("");
-                    }}
-                    className={`p-4 rounded-2xl border text-right transition-all flex items-start justify-between gap-3 ${
-                      selectedCountry === "EG"
-                        ? "bg-af-yellow/15 border-af-yellow text-white shadow-yellow-glow-sm ring-1 ring-af-yellow"
-                        : "bg-white/5 border-white/10 text-gray-300 hover:border-white/20"
-                    }`}
-                  >
-                    <div>
-                      <div className="font-bold text-sm text-white flex items-center gap-2 mb-1">
-                        <span>🇪🇬</span>
-                        <span>جمهورية مصر العربية</span>
-                        <span className="text-[11px] font-bold text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
-                          الجنيه المصري (EGP)
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-gray-300 leading-relaxed">
-                        عرض الأسعار بالجنيه المصري وتفعيل طرق الدفع والتحويل البنكي والمحلي داخل مصر.
-                      </p>
-                    </div>
-                    {selectedCountry === "EG" && (
-                      <CheckCircle2 className="w-5 h-5 text-af-yellow shrink-0 mt-0.5" />
-                    )}
-                  </button>
-
-                  {/* نطاق الخليج */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCountry("GULF");
-                      setPhoneError("");
-                    }}
-                    className={`p-4 rounded-2xl border text-right transition-all flex items-start justify-between gap-3 ${
-                      selectedCountry === "GULF"
-                        ? "bg-af-yellow/15 border-af-yellow text-white shadow-yellow-glow-sm ring-1 ring-af-yellow"
-                        : "bg-white/5 border-white/10 text-gray-300 hover:border-white/20"
-                    }`}
-                  >
-                    <div>
-                      <div className="font-bold text-sm text-white flex items-center gap-2 mb-1">
-                        <span>🇸🇦</span>
-                        <span>المملكة العربية السعودية ودول الخليج</span>
-                        <span className="text-[11px] font-bold text-af-yellow bg-af-yellow/20 px-2 py-0.5 rounded-full border border-af-yellow/30">
-                          الريال السعودي (SAR)
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-gray-300 leading-relaxed">
-                        عرض الأسعار بالريال السعودي وتفعيل بوابات الدفع الإلكتروني المعتمدة بدول الخليج.
-                      </p>
-                    </div>
-                    {selectedCountry === "GULF" && (
-                      <CheckCircle2 className="w-5 h-5 text-af-yellow shrink-0 mt-0.5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* إدخال الاسم بالكامل الإلزامي */}
-              <div>
-                <label className="block text-xs font-bold text-af-yellow mb-2">
-                  الاسم بالكامل (ثنائي أو ثلاثي):
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={inputName}
-                    onChange={(e) => {
-                      setInputName(e.target.value);
-                      if (nameError) setNameError("");
-                    }}
-                    placeholder="مثال: محمد أحمد"
-                    className={`w-full bg-[#060709] border rounded-2xl px-4 py-3.5 pr-11 text-white text-base text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
-                      nameError
-                        ? "border-red-500/80 ring-1 ring-red-500"
-                        : "border-white/10 focus:border-af-yellow"
-                    }`}
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
-                    <User className="w-4 h-4 text-af-yellow" />
-                  </div>
-                </div>
-                {nameError && (
-                  <p className="text-red-400 text-xs mt-1.5 mr-1 font-semibold">
-                    {nameError}
-                  </p>
-                )}
-              </div>
-
-              {/* إدخال رقم الهاتف الإلزامي */}
-              <div>
-                <label className="block text-xs font-bold text-af-yellow mb-2">
-                  رقم الهاتف أو الواتساب للتواصل والتحقق:
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 text-xs font-bold">
-                    {selectedCountry === "EG" ? "+20" : "+966"}
-                  </div>
-                  <input
-                    type="tel"
-                    dir="ltr"
-                    value={inputPhone}
-                    onChange={(e) => {
-                      setInputPhone(e.target.value);
-                      if (phoneError) setPhoneError("");
-                    }}
-                    placeholder={selectedCountry === "EG" ? "010XXXXXXXX" : "5XXXXXXXX"}
-                    className={`w-full bg-[#060709] border rounded-2xl px-4 py-3.5 pl-14 text-white text-base font-mono text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
-                      phoneError
-                        ? "border-red-500/80 ring-1 ring-red-500"
-                        : "border-white/10 focus:border-af-yellow"
-                    }`}
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-af-gray">
-                    <Phone className="w-4 h-4 text-af-muted" />
-                  </div>
-                </div>
-                {phoneError && (
-                  <p className="text-red-400 text-xs mt-1.5 mr-1 font-semibold">
-                    {phoneError}
-                  </p>
-                )}
-              </div>
-
-              {/* زر التأكيد والدخول - إلزامي */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 rounded-2xl bg-af-yellow hover:bg-af-yellow-hover disabled:opacity-70 text-black font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 shadow-yellow-glow-lg transition-all active:scale-98 group"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <span>تأكيد البيانات واستعراض باقات المشروع</span>
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-
-              <div className="flex items-center justify-center gap-2 text-center text-[11px] text-gray-400 pt-1">
-                <ShieldCheck className="w-4 h-4 text-af-yellow shrink-0" />
-                <span>بياناتك مشفرة ومحمية بأعلى معايير الأمان والخصوصية.</span>
-              </div>
-            </form>
+            <button
+              type="button"
+              onClick={handleDismiss}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+              title="إلغاء وإغلاق"
+              aria-label="إلغاء وإغلاق"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
+
+          {/* محتوى النجاح عند الحفظ */}
+          {isSuccess ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-6 text-center space-y-2 relative z-10"
+            >
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h4 className="text-base font-bold text-white">تم حفظ بياناتك بنجاح</h4>
+              <p className="text-xs text-gray-400">
+                أهلاً بك، يمكنك الآن تصفح كافة باقات المشاريع والكورسات بحرية كاملة.
+              </p>
+            </motion.div>
+          ) : (
+            <div className="relative z-10">
+              <h3 className="text-base font-black text-white mb-1">
+                سجل بياناتك لاستلام تفاصيل العروض
+              </h3>
+              <p className="text-[12px] text-gray-300 leading-relaxed mb-4">
+                اكتب اسمك ورقم هاتفك لنرسل لك عروض الأسعار والتفاصيل المناسبة مباشرة عبر الواتساب.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {/* حقل الاسم */}
+                <div>
+                  <label className="block text-[11px] font-bold text-af-yellow mb-1">
+                    الاسم بالكامل:
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={inputName}
+                      onChange={(e) => {
+                        setInputName(e.target.value);
+                        if (nameError) setNameError("");
+                      }}
+                      placeholder="مثال: محمد أحمد"
+                      className={`w-full bg-[#060709] border rounded-xl px-3 py-2.5 pr-9 text-white text-xs text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
+                        nameError
+                          ? "border-red-500/80 ring-1 ring-red-500"
+                          : "border-white/10 focus:border-af-yellow"
+                      }`}
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-af-yellow">
+                      <User className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  {nameError && (
+                    <p className="text-red-400 text-[10px] mt-1 mr-1 font-semibold">{nameError}</p>
+                  )}
+                </div>
+
+                {/* حقل رقم الهاتف */}
+                <div>
+                  <label className="block text-[11px] font-bold text-af-yellow mb-1">
+                    رقم الهاتف أو الواتساب:
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs font-mono font-bold">
+                      +20
+                    </div>
+                    <input
+                      type="tel"
+                      dir="ltr"
+                      value={inputPhone}
+                      onChange={(e) => {
+                        setInputPhone(e.target.value);
+                        if (phoneError) setPhoneError("");
+                      }}
+                      placeholder="010XXXXXXXX"
+                      className={`w-full bg-[#060709] border rounded-xl px-3 py-2.5 pl-12 text-white text-xs font-mono text-right focus:outline-none focus:ring-1 focus:ring-af-yellow transition-all ${
+                        phoneError
+                          ? "border-red-500/80 ring-1 ring-red-500"
+                          : "border-white/10 focus:border-af-yellow"
+                      }`}
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-af-yellow">
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  {phoneError && (
+                    <p className="text-red-400 text-[10px] mt-1 mr-1 font-semibold">{phoneError}</p>
+                  )}
+                </div>
+
+                {/* أزرار الإجراء: حفظ وإلغاء */}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover disabled:opacity-70 text-black font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-yellow-glow transition-all active:scale-98"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5 rotate-180" />
+                        <span>حفظ البيانات</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDismiss}
+                    className="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-xs font-bold transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-center gap-1.5 text-center text-[10px] text-gray-400 pt-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-af-yellow shrink-0" />
+                  <span>بياناتك محمية ولن نرسل لك أي رسائل مزعجة.</span>
+                </div>
+              </form>
+            </div>
+          )}
         </motion.div>
-      </div>
+      )}
     </AnimatePresence>
   );
 }

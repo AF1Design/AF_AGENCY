@@ -288,7 +288,7 @@ export default function HomePage() {
       />
 
       {/* زر الواتساب العائم السريع المتكيف مع وضع التصفح */}
-      <div className="fixed bottom-6 left-6 z-40 flex items-center gap-3">
+      <div className="hidden xl:flex fixed bottom-6 left-6 z-40 items-center gap-3">
         <a
           href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappFloatingMsg)}`}
           target="_blank"

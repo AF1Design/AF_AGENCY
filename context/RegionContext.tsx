@@ -38,29 +38,20 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
     const savedName = localStorage.getItem("af_client_name") || "";
     const gatePassed = localStorage.getItem("af_gate_passed");
 
-    if (savedCountry && (savedCountry === "EG" || savedCountry === "GULF")) {
-      setCountry(savedCountry);
-      setCurrency(savedCurrency || (savedCountry === "EG" ? "EGP" : "SAR"));
-    }
+    // تثبيت العملة والدولة على جمهورية مصر العربية والجنيه المصري لكافة الزوار الحاليين
+    setCountry("EG");
+    setCurrency("EGP");
 
     if (savedName) {
       setClientName(savedName);
     }
 
-    // إلزامي صارم: لا يمكن فتح الموقع والتصفح إلا إذا كان العميل مسجلاً اسمه ورقم هاتفه مع اجتياز البوابة
-    if (
-      savedPhone &&
-      savedPhone.trim().length >= 8 &&
-      savedName &&
-      savedName.trim().length >= 2 &&
-      gatePassed === "true"
-    ) {
+    if (savedPhone && savedPhone.trim().length >= 8) {
       setPhone(savedPhone);
-      setClientName(savedName);
-      setIsGateOpen(false);
-    } else {
-      setIsGateOpen(true);
     }
+
+    // لا يتم حظر الصفحة أو قفل التصفح نهائياً عند الدخول
+    setIsGateOpen(false);
 
     // فحص وضع التصفح المطلوب عبر معلمات الرابط أو التخزين المحلي
     if (typeof window !== "undefined") {
