@@ -233,3 +233,75 @@ export function formatWhatsAppUrl(rawPhone: string, message: string = ""): strin
   return `https://api.whatsapp.com/send?phone=${cleaned}${encodedText}`;
 }
 
+// دالة فحص وتصفية الأرقام الوهمية والمتكررة لمنع نقرات الأطفال والطلبات الزائفة
+export function validateRealPhone(rawPhone: string, country: "EG" | "GULF" = "EG"): string {
+  if (!rawPhone) return "يرجى إدخال رقم الهاتف للمتابعة.";
+  const cleaned = rawPhone.replace(/[^0-9]/g, "");
+
+  // استثناء رقم الأدمن
+  if (cleaned === "011111111112") return "";
+
+  if (country === "EG") {
+    // الأرقام المصرية: 11 رقماً تبدأ بـ 01
+    if (!/^(01)[0-2,5]{1}[0-9]{8}$/.test(cleaned)) {
+      return "يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقماً يبدأ بـ 01";
+    }
+
+    // 1. فحص التكرار الكامل للأرقام (مثل 01000000000 أو 01111111111 أو 01555555555)
+    const suffix = cleaned.substring(3);
+    if (/^(.)\1+$/.test(suffix)) {
+      return "هذا الرقم وهمي. يرجى إدخال رقم هاتفك الفعلي.";
+    }
+
+    // 2. فحص الأرقام المتسلسلة (مثل 01234567890 أو 01012345678)
+    if (
+      cleaned.includes("123456") ||
+      cleaned.includes("234567") ||
+      cleaned.includes("345678") ||
+      cleaned.includes("654321")
+    ) {
+      return "يرجى إدخال رقم هاتف حقيقي وليس أرقاماً متسلسلة.";
+    }
+
+    // 3. فحص الأنماط المزدوجة المكررة (مثل 01010101010 أو 01122334455)
+    if (/^01(01){4,5}$/.test(cleaned) || /^01(11){4,5}$/.test(cleaned) || /^01(22){4,5}$/.test(cleaned)) {
+      return "هذا الرقم غير صحيح. يرجى كتابة رقم هاتفك للتواصل.";
+    }
+  } else {
+    // أرقام الخليج
+    if (cleaned.length < 8 || cleaned.length > 14) {
+      return "يرجى إدخال رقم هاتف خليجي صحيح.";
+    }
+    if (/^(.)\1+$/.test(cleaned)) {
+      return "يرجى إدخال رقم هاتف فعلي وغير مكرر.";
+    }
+  }
+
+  return "";
+}
+
+// دالة فحص وتصفية الأسماء الوهمية لمنع الأسماء العشوائية
+export function validateRealName(rawName: string): string {
+  const cleaned = rawName.trim();
+  if (!cleaned) return "يرجى إدخال اسمك بالكامل للمتابعة.";
+  if (cleaned.length < 3) return "يرجى كتابة اسم صحيح مكون من 3 أحرف على الأقل.";
+
+  // فحص الحروف المكررة العشوائية (مثل aaaa أو سسسس)
+  if (/^(.)\1+$/.test(cleaned)) {
+    return "يرجى كتابة اسم حقيقي وليس حروفاً مكررة.";
+  }
+
+  // فحص الكلمات والرموز العشوائية الشائعة
+  if (/^(asdf|qwer|zxcv|1234|test|تجربة|هههه|ههههه|مجهول|لا اعرف)/i.test(cleaned)) {
+    return "يرجى كتابة اسم حقيقي للمتابعة.";
+  }
+
+  // التأكد من احتواء الاسم على حروف لغوية حقيقية
+  if (!/[a-zA-Z\u0621-\u064A]/.test(cleaned)) {
+    return "يرجى كتابة الاسم بالأحرف.";
+  }
+
+  return "";
+}
+
+

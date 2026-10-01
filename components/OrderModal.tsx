@@ -21,6 +21,7 @@ import {
 import { ServiceCategory, RegionCurrency } from "@/types";
 import { useRegion } from "@/context/RegionContext";
 import { trackEvent } from "@/lib/fpixel";
+import { validateRealPhone, validateRealName } from "@/lib/leadUtils";
 
 interface OrderModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
   const [deliveryTimeframe, setDeliveryTimeframe] = useState("من أسبوع إلى أسبوعين");
   const [maxBudget, setMaxBudget] = useState("");
   const [notes, setNotes] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -107,8 +109,17 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nErr = validateRealName(clientName);
+    const pErr = validateRealPhone(phone, country);
+    if (nErr || pErr) {
+      setErrorMessage(nErr || pErr);
+      return;
+    }
+
     if (isCourse) {
       if (!clientName.trim() || !phone.trim()) {
+        setErrorMessage("يرجى ملء كافة البيانات المطلوبة للمتابعة.");
         return;
       }
     } else {
@@ -120,10 +131,12 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
         !deliveryTimeframe.trim() ||
         !maxBudget.trim()
       ) {
+        setErrorMessage("يرجى ملء كافة البيانات المطلوبة للمتابعة.");
         return;
       }
     }
 
+    setErrorMessage("");
     setIsSubmitting(true);
 
     try {
@@ -388,6 +401,12 @@ export default function OrderModal({ isOpen, onClose, orderData }: OrderModalPro
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#06080E] border border-white/10 text-white text-sm focus:outline-none focus:border-af-yellow transition-colors resize-none"
                 />
               </div>
+
+              {errorMessage && (
+                <p className="text-red-400 text-xs font-bold text-right pt-2 pb-1">
+                  {errorMessage}
+                </p>
+              )}
 
               {/* زر الإرسال */}
               <button

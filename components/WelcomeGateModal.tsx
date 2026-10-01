@@ -6,6 +6,8 @@ import { useRegion } from "@/context/RegionContext";
 import { CountryCode } from "@/types";
 import { ArrowLeft, Phone, User, CheckCircle2, Server, ShieldCheck, Loader2 } from "lucide-react";
 
+import { validateRealPhone, validateRealName } from "@/lib/leadUtils";
+
 export default function WelcomeGateModal() {
   const { isGateOpen, setRegion } = useRegion();
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>("EG");
@@ -29,35 +31,8 @@ export default function WelcomeGateModal() {
 
   if (!isGateOpen) return null;
 
-  const validateName = (nameStr: string) => {
-    const cleaned = nameStr.trim();
-    if (!cleaned) return "يرجى إدخال اسمك بالكامل للمتابعة.";
-    if (cleaned.length < 3) return "يرجى إدخال اسم صحيح مكون من 3 أحرف على الأقل.";
-    return "";
-  };
-
-  const validatePhone = (phoneStr: string, country: CountryCode) => {
-    const cleaned = phoneStr.replace(/\s+/g, "");
-    if (!cleaned) return "يرجى إدخال رقم الهاتف للمتابعة.";
-
-    // رقم هاتف الإدارة معتمد ومقبول دائماً
-    if (cleaned === "011111111112") {
-      return "";
-    }
-    
-    if (country === "EG") {
-      // الأرقام المصرية تبدأ بـ 01 وتتكون من 11 رقماً
-      if (!/^(01)[0-2,5]{1}[0-9]{8}$/.test(cleaned) && cleaned.length < 10) {
-        return "يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقماً يبدأ بـ 01";
-      }
-    } else {
-      // أرقام الخليج تبدأ عادة بـ 5 وتتراوح بين 8 إلى 12 رقماً
-      if (cleaned.length < 8 || cleaned.length > 14) {
-        return "يرجى إدخال رقم هاتف خليجي صحيح.";
-      }
-    }
-    return "";
-  };
+  const validateName = (nameStr: string) => validateRealName(nameStr);
+  const validatePhone = (phoneStr: string, country: CountryCode) => validateRealPhone(phoneStr, country);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
