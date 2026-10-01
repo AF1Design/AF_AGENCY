@@ -93,7 +93,7 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
           {/* الشعار ومفتاح التبديل للكمبيوتر */}
           <div className="flex items-center gap-4 sm:gap-6">
             <a href="#" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-32 sm:w-44 h-10 sm:h-12 transition-transform duration-300 group-hover:scale-105">
+              <div className="relative w-28 sm:w-44 h-9 sm:h-12 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   key={portalMode}
                   src={isAcademy ? "/images/logo-academy.png" : "/images/logo-transparent.png"}
@@ -259,24 +259,22 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
               </a>
             )}
 
-            {/* زر الإجراء الرئيسي */}
+            {/* زر الإجراء الرئيسي للكمبيوتر والشاشات الأكبر */}
             {!isAcademy ? (
               <button
                 onClick={onOpenConfigurator}
-                className="relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95"
+                className="hidden sm:inline-flex relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95 shrink-0"
               >
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">START A PROJECT</span>
-                <span className="sm:hidden text-[11px]">PROJECT</span>
+                <span>START A PROJECT</span>
               </button>
             ) : (
               <button
                 onClick={() => scrollToSection("courses")}
-                className="relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs flex items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95"
+                className="hidden sm:inline-flex relative group overflow-hidden px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-af-yellow hover:bg-af-yellow-hover text-af-dark font-extrabold text-xs items-center gap-1.5 shadow-yellow-glow transition-all active:scale-95 shrink-0"
               >
                 <GraduationCap className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">EXPLORE TRACKS</span>
-                <span className="sm:hidden text-[11px]">COURSES</span>
+                <span>EXPLORE TRACKS</span>
               </button>
             )}
 
@@ -295,7 +293,7 @@ export default function Navbar({ onOpenConfigurator }: NavbarProps) {
             {/* زر القائمة للموبايل */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-af-card border border-white/10 text-af-light hover:text-af-yellow"
+              className="lg:hidden p-2 rounded-xl bg-af-card border border-white/10 text-af-light hover:text-af-yellow shrink-0 focus:outline-none"
               aria-label="القائمة"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
